@@ -17,6 +17,7 @@ func TestActivity(t *testing.T) {
 
 	type Test struct {
 		name    string
+		cfg     removefiles.Config
 		params  removefiles.ActivityParams
 		want    removefiles.ActivityResult
 		wantFs  tfs.Manifest
@@ -25,6 +26,7 @@ func TestActivity(t *testing.T) {
 	for _, tt := range []Test{
 		{
 			name: "Deletes all .DS_Store files",
+			cfg:  removefiles.Config{RemoveNames: "Thumbs.db, .DS_Store\n"},
 			params: removefiles.ActivityParams{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile(".DS_Store", "delete me."),
@@ -34,7 +36,6 @@ func TestActivity(t *testing.T) {
 						tfs.WithFile("keepme2", "keep me too."),
 					),
 				).Path(),
-				RemoveNames: "Thumbs.db, .DS_Store\n",
 			},
 			want: removefiles.ActivityResult{Count: 2},
 			wantFs: tfs.Expected(t,
@@ -46,6 +47,7 @@ func TestActivity(t *testing.T) {
 		},
 		{
 			name: "Deletes a .git directory",
+			cfg:  removefiles.Config{RemoveNames: ".git"},
 			params: removefiles.ActivityParams{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile("keepme", "don't delete me."),
@@ -60,7 +62,6 @@ func TestActivity(t *testing.T) {
 `),
 					),
 				).Path(),
-				RemoveNames: ".git",
 			},
 			want: removefiles.ActivityResult{Count: 1},
 			wantFs: tfs.Expected(t,
@@ -83,20 +84,20 @@ func TestActivity(t *testing.T) {
 		},
 		{
 			name: "Errors if Path doesn't exist",
+			cfg:  removefiles.Config{RemoveNames: "Thumbs.db, .DS_Store"},
 			params: removefiles.ActivityParams{
-				Path:        "not_there",
-				RemoveNames: "Thumbs.db, .DS_Store",
+				Path: "not_there",
 			},
 			wantErr: "activity error (type: remove-files-activity, scheduledEventID: 0, startedEventID: 0, identity: ): RemoveFilesActivity: remove: stat %s: no such file or directory",
 		},
 		{
 			name: "Errors if path is not a directory",
+			cfg:  removefiles.Config{RemoveNames: "Thumbs.db, .DS_Store"},
 			params: removefiles.ActivityParams{
 				Path: tfs.NewDir(t, "remove-files-test",
 					tfs.WithFile(".DS_Store", "delete me."),
 					tfs.WithFile("keepme", "don't delete me."),
 				).Join("keepme"),
-				RemoveNames: "Thumbs.db, .DS_Store",
 			},
 			wantErr: "activity error (type: remove-files-activity, scheduledEventID: 0, startedEventID: 0, identity: ): RemoveFilesActivity: remove: path: %q: not a directory",
 		},
@@ -107,10 +108,8 @@ func TestActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				removefiles.NewActivity().Execute,
-				temporalsdk_activity.RegisterOptions{
-					Name: removefiles.ActivityName,
-				},
+				removefiles.NewActivity(tt.cfg).Execute,
+				temporalsdk_activity.RegisterOptions{Name: removefiles.ActivityName},
 			)
 
 			enc, err := env.ExecuteActivity(removefiles.ActivityName, &tt.params)

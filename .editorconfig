@@ -1,0 +1,10 @@
+; http://editorconfig.org/
+
+root = true
+
+[Makefile]
+indent_style = tab
+
+[.golangci.yml]
+indent_style = space
+indent_size = 2

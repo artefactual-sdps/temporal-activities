@@ -128,6 +128,8 @@ github.com/mholt/archiver/v4 v4.0.0-alpha.8 h1:tRGQuDVPh66WCOelqe6LIGh0gwmfwxUrS
 github.com/mholt/archiver/v4 v4.0.0-alpha.8/go.mod h1:5f7FUYGXdJWUjESffJaYR4R60VhnHxb2X3T1teMyv5A=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.2 h1:e3mzJFJs4k83GXBEiTaQ5HgSc/kOK8q0rDaRO0MPaOk=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.2/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
+github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af h1:I3StjEXH279zjQyXyBFuTyf+ga1sdySf0C2xtpHU0Ag=
+github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af/go.mod h1:ASz84B/bXWNXm84rt+eYAs4vUJqa2C7V/kzHSVVRxl8=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/otiai10/copy v1.14.0 h1:dCI/t1iTdYGtkvCuBG2BgR6KZa83PTclw4U5n2wAllU=
 github.com/otiai10/copy v1.14.0/go.mod h1:ECfuL02W+/FkTWZWgQqXPWZgW9oeKCSQ5qVfSc4qc4w=
@@ -168,8 +170,8 @@ github.com/ulikunitz/xz v0.5.10/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0o
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
-go.artefactual.dev/tools v0.12.0 h1:NxSnKoTcYEwnr91/8fOjC5gr20uhVlU5ouboIHAhT9M=
-go.artefactual.dev/tools v0.12.0/go.mod h1:exAc0MSKv1oXXb3FuSwkN+tg0n95HHGKpM18lxu4CKU=
+go.artefactual.dev/tools v0.14.0 h1:ESLbemsnkdIPmYXtz0uZTcPqVnTUXIEZd9DSTRyTZqY=
+go.artefactual.dev/tools v0.14.0/go.mod h1:5RJ7ObocHZv/zQFYFv/zG9cW/UVRGPFywcJx/oQ+TG8=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=

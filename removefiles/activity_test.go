@@ -102,6 +102,8 @@ func TestActivity(t *testing.T) {
 			wantErr: "activity error (type: remove-files-activity, scheduledEventID: 0, startedEventID: 0, identity: ): RemoveFilesActivity: remove: path: %q: not a directory",
 		},
 	} {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

@@ -45,5 +45,3 @@ linters-settings:
     exclude-generated: false
     severity: low
     confidence: low
-    excludes:
-      - G601 # Implicit memory aliasing of items (only for Go 1.21 or lower)

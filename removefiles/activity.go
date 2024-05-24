@@ -6,31 +6,31 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
-	"strings"
 
 	"go.artefactual.dev/tools/temporal"
 )
 
 const ActivityName = "remove-files-activity"
 
-type Config struct {
-	// RemoveNames is the comma separated list of filenames that should be
-	// removed from all transfers.
-	RemoveNames string
-}
+type Activity struct{}
 
-type Activity struct {
-	cfg Config
-}
-
-func NewActivity(cfg Config) *Activity {
-	return &Activity{cfg: cfg}
+func NewActivity() *Activity {
+	return &Activity{}
 }
 
 type ActivityParams struct {
 	// Path is the directory from which files should be removed.
 	Path string
+
+	// RemoveNames is a slice of filename strings that should be
+	// removed from the directory.
+	RemoveNames []string
+
+	// RemovePatterns is a slice of regular expressions that
+	// should be removed from the directory.
+	RemovePatterns []*regexp.Regexp
 }
 
 type ActivityResult struct {
@@ -39,26 +39,22 @@ type ActivityResult struct {
 }
 
 // Execute deletes any file or directory in params.Path (and sub-directories)
-// whose name matches one of the values in params.RemoveNames, and returns a
-// count of deleted items. A deleted directory is counted as one deleted item
-// no matter how many items the directory contains.
+// whose name matches one of the values in params.RemoveNames and params.RemovePatterns,
+// and returns a count of deleted items. A deleted directory is counted as one deleted
+// item no matter how many items the directory contains.
 //
-// RemoveNames should be a comma delimited list of file names, e.g.
-// "Thumbs.db,.DS_Store". Any Unicode whitespace characters are trimmed from
-// each name in the list, so "Thumbs.db, .DS_Store\n" is equivalent to previous
-// example.
-//
-// If RemoveNames is an empty string, then Execute returns without deleting
-// anything.
+// If params.RemoveNames and params.RemovePatterns are empty, then Execute returns without
+// deleting anything.
 func (a *Activity) Execute(ctx context.Context, params *ActivityParams) (*ActivityResult, error) {
 	logger := temporal.GetLogger(ctx)
 	logger.V(1).Info(
 		"Executing RemoveFilesActivity",
-		"RemoveNames", a.cfg.RemoveNames,
 		"Path", params.Path,
+		"RemoveNames", params.RemoveNames,
+		"RemovePatterns", params.RemovePatterns,
 	)
 
-	count, err := removeByNames(params.Path, a.cfg.RemoveNames)
+	count, err := remove(params.Path, params.RemoveNames, params.RemovePatterns)
 	if err != nil {
 		return nil, fmt.Errorf("RemoveFilesActivity: %v", err)
 	}
@@ -66,13 +62,13 @@ func (a *Activity) Execute(ctx context.Context, params *ActivityParams) (*Activi
 	return &ActivityResult{Count: count}, nil
 }
 
-// removeByNames deletes any file or directory in dir (and sub-directories)
-// whose name matches one of the values in remove, then returns a count of
-// deleted items.
-func removeByNames(dir, names string) (int, error) {
+// remove deletes any file or directory in dir (and sub-directories) whose
+// name matches one of the values in names and/or patterns, then returns a
+// count of deleted items.
+func remove(dir string, names []string, patterns []*regexp.Regexp) (int, error) {
 	var count int
 
-	if names == "" {
+	if len(names) == 0 && len(patterns) == 0 {
 		return 0, nil
 	}
 
@@ -84,7 +80,6 @@ func removeByNames(dir, names string) (int, error) {
 		return 0, fmt.Errorf("remove: path: %q: not a directory", dir)
 	}
 
-	files := parseNames(names)
 	err = filepath.WalkDir(
 		dir,
 		func(path string, d fs.DirEntry, err error) error {
@@ -92,7 +87,19 @@ func removeByNames(dir, names string) (int, error) {
 				return err
 			}
 
-			if slices.Contains(files, d.Name()) {
+			matches := false
+			if slices.Contains(names, d.Name()) {
+				matches = true
+			} else {
+				for _, re := range patterns {
+					matches = re.MatchString(d.Name())
+					if matches {
+						break
+					}
+				}
+			}
+
+			if matches {
 				err := os.RemoveAll(path)
 				if err != nil {
 					return fmt.Errorf("remove file: %v", err)
@@ -112,15 +119,4 @@ func removeByNames(dir, names string) (int, error) {
 	}
 
 	return count, nil
-}
-
-// parseNames splits names using a comma delimiter and trims any leading or
-// trailing whitespace from each item in the resulting slice.
-func parseNames(names string) []string {
-	files := strings.Split(names, ",")
-	for i, s := range files {
-		files[i] = strings.TrimSpace(s)
-	}
-
-	return files
 }

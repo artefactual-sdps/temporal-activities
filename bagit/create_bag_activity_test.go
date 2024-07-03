@@ -24,7 +24,7 @@ const (
 `
 )
 
-func defaultBagContents(t *testing.T) tfs.Manifest {
+func testBagManifest(t *testing.T) tfs.Manifest {
 	return tfs.Expected(t,
 		tfs.WithFile("bag-info.txt", "", tfs.MatchAnyFileContent, tfs.WithMode(fileMode)),
 		tfs.WithFile("bagit.txt", "", tfs.MatchAnyFileContent, tfs.WithMode(fileMode)),
@@ -48,7 +48,7 @@ func sourcePath(t *testing.T) string {
 	return td.Path()
 }
 
-func TestExtractActivity(t *testing.T) {
+func TestCreateBagActivity(t *testing.T) {
 	t.Parallel()
 
 	type test struct {
@@ -64,7 +64,7 @@ func TestExtractActivity(t *testing.T) {
 			params: bagit.CreateBagActivityParams{
 				SourcePath: sourcePath(t),
 			},
-			want: defaultBagContents(t),
+			want: testBagManifest(t),
 		},
 		{
 			name: "Creates a bag in a new dir",
@@ -72,7 +72,7 @@ func TestExtractActivity(t *testing.T) {
 				SourcePath: sourcePath(t),
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test").Path(),
 			},
-			want: defaultBagContents(t),
+			want: testBagManifest(t),
 		},
 		{
 			name: "Creates a bag with SHA-256 checksums",

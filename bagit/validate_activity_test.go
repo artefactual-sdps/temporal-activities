@@ -75,7 +75,6 @@ func TestValidateActivity(t *testing.T) {
 
 	type test struct {
 		name    string
-		cfg     bagit.Config
 		params  bagit.ValidateActivityParams
 		want    bagit.ValidateActivityResult
 		wantErr string
@@ -108,7 +107,7 @@ func TestValidateActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				bagit.NewValidateActivity(tt.cfg, validator).Execute,
+				bagit.NewValidateActivity(validator).Execute,
 				temporalsdk_activity.RegisterOptions{Name: bagit.ValidateActivityName},
 			)
 

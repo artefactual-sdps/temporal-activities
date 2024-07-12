@@ -13,14 +13,11 @@ type BagValidator interface {
 }
 
 type ValidateActivity struct {
-	cfg       *Config
 	validator BagValidator
 }
 
-func NewValidateActivity(cfg Config, validator BagValidator) *ValidateActivity {
-	cfg.setDefaults()
-
-	return &ValidateActivity{cfg: &cfg, validator: validator}
+func NewValidateActivity(validator BagValidator) *ValidateActivity {
+	return &ValidateActivity{validator: validator}
 }
 
 type ValidateActivityParams struct {

@@ -3,7 +3,7 @@ module github.com/artefactual-sdps/temporal-activities
 go 1.21.4
 
 require (
-	github.com/artefactual-labs/bagit-gython v0.0.0-20240705163721-e693839acbf6
+	github.com/artefactual-labs/bagit-gython v0.2.0
 	github.com/google/safeopen v0.0.0-20240125081138-66b54d5181c6
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af

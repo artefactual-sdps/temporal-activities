@@ -1,6 +1,7 @@
 package bagit_test
 
 import (
+	"errors"
 	"testing"
 
 	bagit_gython "github.com/artefactual-labs/bagit-gython"
@@ -65,13 +66,18 @@ Tag-File-Character-Encoding: UTF-8`,
 	return d.Path()
 }
 
+func setup(t *testing.T) bagit.BagValidator {
+	validator, err := bagit_gython.NewBagIt()
+	if err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	t.Cleanup(func() { validator.Cleanup() })
+
+	return validator
+}
+
 func TestValidateActivity(t *testing.T) {
 	t.Parallel()
-
-	// bagit_gython.NewBagIt() is expensive, so only call it once.
-	validator, err := bagit_gython.NewBagIt()
-	assert.NilError(t, err)
-	defer t.Cleanup(func() { validator.Cleanup() })
 
 	type test struct {
 		name    string
@@ -104,6 +110,7 @@ func TestValidateActivity(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			validator := setup(t)
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
@@ -113,6 +120,7 @@ func TestValidateActivity(t *testing.T) {
 
 			enc, err := env.ExecuteActivity(bagit.ValidateActivityName, tt.params)
 			if tt.wantErr != "" {
+				assert.ErrorIs(t, err, bagit.ErrInvalid)
 				assert.ErrorContains(t, err, tt.wantErr)
 				return
 			}
@@ -123,4 +131,19 @@ func TestValidateActivity(t *testing.T) {
 			assert.DeepEqual(t, result, tt.want)
 		})
 	}
+}
+
+func TestValidateSystemError(t *testing.T) {
+	t.Parallel()
+
+	validator := bagit.NewMockValidator().SetErr(errors.New("transporter accident"))
+	ts := &temporalsdk_testsuite.WorkflowTestSuite{}
+	env := ts.NewTestActivityEnvironment()
+	env.RegisterActivityWithOptions(
+		bagit.NewValidateActivity(validator).Execute,
+		temporalsdk_activity.RegisterOptions{Name: bagit.ValidateActivityName},
+	)
+
+	_, err := env.ExecuteActivity(bagit.ValidateActivityName, bagit.ValidateActivityParams{})
+	assert.Error(t, err, "activity error (type: validate-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): bagit validate activity: transporter accident")
 }

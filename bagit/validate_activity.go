@@ -2,6 +2,8 @@ package bagit
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"go.artefactual.dev/tools/temporal"
 )
@@ -35,6 +37,12 @@ type ValidateActivityResult struct {
 }
 
 // Execute validates the BagIt Bag located at Path.
+//
+// If validation succeeds Execute returns `&ValidateActivityResult{Valid: true},
+// nil`.
+// If validation fails Execute returns `&ValidateActivityResult{Valid: false,
+// Error: "message"}, nil`.
+// If an application error occurs Execute returns `nil, error("message")`
 func (a *ValidateActivity) Execute(
 	ctx context.Context,
 	params *ValidateActivityParams,
@@ -43,10 +51,14 @@ func (a *ValidateActivity) Execute(
 	logger.V(1).Info("Executing BagIt Validate Activity", "Path", params.Path)
 
 	if err := a.validator.Validate(params.Path); err != nil {
-		return &ValidateActivityResult{
-			Valid: false,
-			Error: err.Error(),
-		}, nil
+		if errors.Is(convertError(err), ErrInvalid) {
+			return &ValidateActivityResult{
+				Valid: false,
+				Error: err.Error(),
+			}, nil
+		}
+
+		return nil, fmt.Errorf("bagit validate activity: %v", err)
 	}
 
 	return &ValidateActivityResult{Valid: true}, nil

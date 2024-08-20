@@ -1,4 +1,4 @@
-package archive
+package archiveextract
 
 import (
 	"context"
@@ -13,34 +13,34 @@ import (
 	"go.artefactual.dev/tools/temporal"
 )
 
-const ExtractActivityName = "extract-archive-activity"
+const Name = "archive-extract"
 
 var (
 	ErrNotAFile       = errors.New("Not a file")
 	ErrInvalidArchive = errors.New("Invalid archive")
 )
 
-type ExtractActivity struct {
-	cfg Config
-}
+type (
+	Params struct {
+		// SourcePath is the path of the archive to be extracted.
+		SourcePath string
 
-func NewExtractActivity(cfg Config) *ExtractActivity {
-	return &ExtractActivity{cfg: cfg}
-}
+		// DestPath is the path where the ExtractPath should be created. If
+		// DestPath is not set then ExtractPath will be in the same directory as
+		// SourcePath.
+		DestPath string
+	}
+	Result struct {
+		// ExtractPath is the path of the extracted archive contents.
+		ExtractPath string
+	}
+	Activity struct {
+		cfg Config
+	}
+)
 
-type ExtractActivityParams struct {
-	// SourcePath is the path of the archive to be extracted.
-	SourcePath string
-
-	// DestPath is the path where the ExtractPath should be created. If
-	// DestPath is not set then ExtractPath will be in the same directory as
-	// SourcePath.
-	DestPath string
-}
-
-type ExtractActivityResult struct {
-	// ExtractPath is the path of the extracted archive contents.
-	ExtractPath string
+func New(cfg Config) *Activity {
+	return &Activity{cfg: cfg}
 }
 
 // Execute extracts the content of SourcePath to a unique extract directory in
@@ -49,9 +49,7 @@ type ExtractActivityResult struct {
 // If SourcePath is a directory an ErrNotAFile error is returned.
 // If SourcePath is a file, but not a valid archive, an ErrInvalidArchive error
 // is returned.
-func (a *ExtractActivity) Execute(
-	ctx context.Context, params *ExtractActivityParams,
-) (*ExtractActivityResult, error) {
+func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
 	logger.V(1).Info("Executing ExtractActivity",
 		"SourcePath", params.SourcePath,
@@ -64,26 +62,26 @@ func (a *ExtractActivity) Execute(
 	if err != nil {
 		switch err {
 		case ErrNotAFile:
-			logger.V(2).Info("ExtractActivity: not a file", "SourcePath", params.SourcePath)
+			logger.V(2).Info("archiveextract: not a file", "SourcePath", params.SourcePath)
 			return nil, err
 		case ErrInvalidArchive:
-			logger.V(2).Info("ExtractActivity: not a valid archive", "SourcePath", params.SourcePath)
+			logger.V(2).Info("archiveextract: not a valid archive", "SourcePath", params.SourcePath)
 			return nil, err
 		default:
-			return nil, fmt.Errorf("extract archive: %v", err)
+			return nil, fmt.Errorf("archiveextract: %v", err)
 		}
 	}
 
 	dest, err = skipTopLevelDir(dest)
 	if err != nil {
-		return nil, fmt.Errorf("extract archive: skipTopLevelDir: %v", err)
+		return nil, fmt.Errorf("archiveextract: skipTopLevelDir: %v", err)
 	}
 
-	return &ExtractActivityResult{ExtractPath: dest}, nil
+	return &Result{ExtractPath: dest}, nil
 }
 
 // extract extracts the contents of src archive to dest.
-func (a *ExtractActivity) extract(ctx context.Context, src, dest string) (string, error) {
+func (a *Activity) extract(ctx context.Context, src, dest string) (string, error) {
 	fi, err := os.Stat(src)
 	if err != nil {
 		return "", err
@@ -126,7 +124,7 @@ func (a *ExtractActivity) extract(ctx context.Context, src, dest string) (string
 }
 
 // writeFileHandler writes the extracted archive file to dest.
-func (a *ExtractActivity) writeFileHandler(dest string) archiver.FileHandler {
+func (a *Activity) writeFileHandler(dest string) archiver.FileHandler {
 	return func(ctx context.Context, f archiver.File) error {
 		path := filepath.Join(dest, f.NameInArchive)
 

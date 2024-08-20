@@ -12,30 +12,30 @@ import (
 	"go.artefactual.dev/tools/temporal"
 )
 
-const ActivityName = "remove-files-activity"
+const Name = "remove-files"
 
-type Activity struct{}
+type (
+	Params struct {
+		// Path is the directory from which files should be removed.
+		Path string
 
-func NewActivity() *Activity {
+		// RemoveNames is a slice of filename strings that should be
+		// removed from the directory.
+		RemoveNames []string
+
+		// RemovePatterns is a slice of regular expressions that
+		// should be removed from the directory.
+		RemovePatterns []*regexp.Regexp
+	}
+	Result struct {
+		// Count is the number of files removed from Path.
+		Count int
+	}
+	Activity struct{}
+)
+
+func New() *Activity {
 	return &Activity{}
-}
-
-type ActivityParams struct {
-	// Path is the directory from which files should be removed.
-	Path string
-
-	// RemoveNames is a slice of filename strings that should be
-	// removed from the directory.
-	RemoveNames []string
-
-	// RemovePatterns is a slice of regular expressions that
-	// should be removed from the directory.
-	RemovePatterns []*regexp.Regexp
-}
-
-type ActivityResult struct {
-	// Count is the number of files removed from Path.
-	Count int
 }
 
 // Execute deletes any file or directory in params.Path (and sub-directories)
@@ -45,10 +45,10 @@ type ActivityResult struct {
 //
 // If params.RemoveNames and params.RemovePatterns are empty, then Execute returns without
 // deleting anything.
-func (a *Activity) Execute(ctx context.Context, params *ActivityParams) (*ActivityResult, error) {
+func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
 	logger.V(1).Info(
-		"Executing RemoveFilesActivity",
+		"Executing remove-files activity",
 		"Path", params.Path,
 		"RemoveNames", params.RemoveNames,
 		"RemovePatterns", params.RemovePatterns,
@@ -56,10 +56,10 @@ func (a *Activity) Execute(ctx context.Context, params *ActivityParams) (*Activi
 
 	count, err := remove(params.Path, params.RemoveNames, params.RemovePatterns)
 	if err != nil {
-		return nil, fmt.Errorf("RemoveFilesActivity: %v", err)
+		return nil, fmt.Errorf("removefiles: %v", err)
 	}
 
-	return &ActivityResult{Count: count}, nil
+	return &Result{Count: count}, nil
 }
 
 // remove deletes any file or directory in dir (and sub-directories) whose

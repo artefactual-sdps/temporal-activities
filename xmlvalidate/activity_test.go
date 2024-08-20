@@ -1,4 +1,4 @@
-package xml_test
+package xmlvalidate_test
 
 import (
 	"fmt"
@@ -10,46 +10,46 @@ import (
 	"gotest.tools/v3/assert"
 	tfs "gotest.tools/v3/fs"
 
-	"github.com/artefactual-sdps/temporal-activities/xml"
+	"github.com/artefactual-sdps/temporal-activities/xmlvalidate"
 )
 
-func TestXSDValidateActivity(t *testing.T) {
+func TestActivity(t *testing.T) {
 	t.Parallel()
 
 	type test struct {
 		name    string
-		params  func() xml.XSDValidateActivityParams
-		want    func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult
+		params  func() xmlvalidate.Params
+		want    func(params xmlvalidate.Params) xmlvalidate.Result
 		wantErr string
 	}
 	for _, tt := range []test{
 		{
 			name: "Test XSD validate activity with a valid XML file and a valid XSD file",
-			params: func() xml.XSDValidateActivityParams {
+			params: func() xmlvalidate.Params {
 				validXMLFilePath := filepath.Join("testdata", "person_valid.xml")
 				XSDTestFilePath := filepath.Join("testdata", "person.xsd")
 
-				return xml.XSDValidateActivityParams{
+				return xmlvalidate.Params{
 					XMLFilePath: validXMLFilePath,
 					XSDFilePath: XSDTestFilePath,
 				}
 			},
-			want: func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult {
-				return xml.XSDValidateActivityResult{Failures: nil}
+			want: func(params xmlvalidate.Params) xmlvalidate.Result {
+				return xmlvalidate.Result{Failures: nil}
 			},
 		},
 		{
 			name: "Test XSD validate activity with an invalid XML file and a valid XSD file ",
-			params: func() xml.XSDValidateActivityParams {
+			params: func() xmlvalidate.Params {
 				invalidXMLFilePath := filepath.Join("testdata", "person_invalid.xml")
 				XSDTestFilePath := filepath.Join("testdata", "person.xsd")
 
-				return xml.XSDValidateActivityParams{
+				return xmlvalidate.Params{
 					XMLFilePath: invalidXMLFilePath,
 					XSDFilePath: XSDTestFilePath,
 				}
 			},
-			want: func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult {
+			want: func(params xmlvalidate.Params) xmlvalidate.Result {
 				invalidXMLFailures := fmt.Sprintf(
 					"%s:3: element age: Schemas validity error : Element 'age': This element is not expected. Expected is ( name ).\n"+
 						"%s fails to validate\n",
@@ -57,21 +57,21 @@ func TestXSDValidateActivity(t *testing.T) {
 					params.XMLFilePath,
 				)
 
-				return xml.XSDValidateActivityResult{Failures: []byte(invalidXMLFailures)}
+				return xmlvalidate.Result{Failures: []byte(invalidXMLFailures)}
 			},
 		},
 		{
 			name: "Test XSD validate activity with a valid XML file and an invalid XSD file",
-			params: func() xml.XSDValidateActivityParams {
+			params: func() xmlvalidate.Params {
 				validXMLFilePath := filepath.Join("testdata", "person_valid.xml")
 				invalidXSDFilePath := filepath.Join("testdata", "invalid.xsd")
 
-				return xml.XSDValidateActivityParams{
+				return xmlvalidate.Params{
 					XMLFilePath: validXMLFilePath,
 					XSDFilePath: invalidXSDFilePath,
 				}
 			},
-			want: func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult {
+			want: func(params xmlvalidate.Params) xmlvalidate.Result {
 				invalidXSDFailures := fmt.Sprintf(
 					"%s:1: parser error : Start tag expected, '<' not found\n"+
 						"junk\n"+
@@ -83,42 +83,42 @@ func TestXSDValidateActivity(t *testing.T) {
 					params.XSDFilePath,
 				)
 
-				return xml.XSDValidateActivityResult{Failures: []byte(invalidXSDFailures)}
+				return xmlvalidate.Result{Failures: []byte(invalidXSDFailures)}
 			},
 		},
 		{
 			name: "Test XSD validate activity with a non-existent XML file and a valid XSD file",
-			params: func() xml.XSDValidateActivityParams {
+			params: func() xmlvalidate.Params {
 				nonExistentFile := tfs.NewFile(t, "removed_file")
 				nonExistentFile.Remove()
 
 				XSDTestFilePath := filepath.Join("testdata", "person.xsd")
 
-				return xml.XSDValidateActivityParams{
+				return xmlvalidate.Params{
 					XMLFilePath: nonExistentFile.Path(),
 					XSDFilePath: XSDTestFilePath,
 				}
 			},
-			want: func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult {
-				return xml.XSDValidateActivityResult{}
+			want: func(params xmlvalidate.Params) xmlvalidate.Result {
+				return xmlvalidate.Result{}
 			},
 			wantErr: "no such file or directory",
 		},
 		{
 			name: "Test XSD validate activity with a valid XML file and a non-existent XSD file",
-			params: func() xml.XSDValidateActivityParams {
+			params: func() xmlvalidate.Params {
 				validXMLFilePath := filepath.Join("testdata", "person_valid.xml")
 
 				nonExistentFile := tfs.NewFile(t, "removed_file")
 				nonExistentFile.Remove()
 
-				return xml.XSDValidateActivityParams{
+				return xmlvalidate.Params{
 					XMLFilePath: validXMLFilePath,
 					XSDFilePath: nonExistentFile.Path(),
 				}
 			},
-			want: func(params xml.XSDValidateActivityParams) xml.XSDValidateActivityResult {
-				return xml.XSDValidateActivityResult{}
+			want: func(params xmlvalidate.Params) xmlvalidate.Result {
+				return xmlvalidate.Result{}
 			},
 			wantErr: "no such file or directory",
 		},
@@ -130,12 +130,12 @@ func TestXSDValidateActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				xml.NewXSDValidateActivity().Execute,
-				temporalsdk_activity.RegisterOptions{Name: xml.XSDValidateActivityName},
+				xmlvalidate.New().Execute,
+				temporalsdk_activity.RegisterOptions{Name: xmlvalidate.Name},
 			)
 
-			var res xml.XSDValidateActivityResult
-			future, err := env.ExecuteActivity(xml.XSDValidateActivityName, tt.params())
+			var res xmlvalidate.Result
+			future, err := env.ExecuteActivity(xmlvalidate.Name, tt.params())
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 				return

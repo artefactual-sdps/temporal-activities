@@ -1,4 +1,4 @@
-package bagit
+package bagvalidate
 
 import (
 	"errors"

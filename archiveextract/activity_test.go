@@ -1,4 +1,4 @@
-package archive_test
+package archiveextract_test
 
 import (
 	"fmt"
@@ -13,12 +13,12 @@ import (
 	"gotest.tools/v3/assert"
 	tfs "gotest.tools/v3/fs"
 
-	"github.com/artefactual-sdps/temporal-activities/archive"
+	"github.com/artefactual-sdps/temporal-activities/archiveextract"
 )
 
 const smallTxtContent = "I am a small file.\n"
 
-func TestExtractActivity(t *testing.T) {
+func TestActivity(t *testing.T) {
 	t.Parallel()
 
 	// Use a shared dest directory to test that multiple simultaneous extracts
@@ -27,15 +27,15 @@ func TestExtractActivity(t *testing.T) {
 
 	type test struct {
 		name    string
-		cfg     archive.Config
-		params  archive.ExtractActivityParams
+		cfg     archiveextract.Config
+		params  archiveextract.Params
 		wantFs  tfs.Manifest
 		wantErr string
 	}
 	for _, tt := range []test{
 		{
 			name: "Extracts a tar gzip archive",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "transfer.tar.gz"),
 				DestPath:   dest,
 			},
@@ -45,7 +45,7 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Extracts a tar gzip archive with no DestPath",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: func() string {
 					// Copy transfer.tar.gz to a temporary directory so we don't
 					// make a random extract dir in testdata/.
@@ -63,7 +63,7 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Extracts a zip archive with no sub-directories",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "transfer_no_subdir.zip"),
 				DestPath:   dest,
 			},
@@ -73,7 +73,7 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Extracts a zip archive with a sub-directory and a file",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "transfer_subdir+file.zip"),
 				DestPath:   dest,
 			},
@@ -84,8 +84,8 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Extracts a zip archive with explicit file modes",
-			cfg:  archive.Config{DirMode: 0o750, FileMode: 0o640},
-			params: archive.ExtractActivityParams{
+			cfg:  archiveextract.Config{DirMode: 0o750, FileMode: 0o640},
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "transfer_subdir+file.zip"),
 				DestPath:   dest,
 			},
@@ -96,7 +96,7 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Extracts a 7z archive",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "transfer.7z"),
 				DestPath:   dest,
 			},
@@ -106,37 +106,37 @@ func TestExtractActivity(t *testing.T) {
 		},
 		{
 			name: "Errors when SourcePath is a dir",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: "testdata",
 			},
 			wantErr: fmt.Sprintf(
-				"activity error (type: extract-archive-activity, scheduledEventID: 0, startedEventID: 0, identity: ): %s",
-				archive.ErrNotAFile,
+				"activity error (type: archive-extract, scheduledEventID: 0, startedEventID: 0, identity: ): %s",
+				archiveextract.ErrNotAFile,
 			),
 		},
 		{
 			name: "Errors when SourcePath is a non-archive file",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "small.txt"),
 			},
 			wantErr: fmt.Sprintf(
-				"activity error (type: extract-archive-activity, scheduledEventID: 0, startedEventID: 0, identity: ): %s",
-				archive.ErrInvalidArchive,
+				"activity error (type: archive-extract, scheduledEventID: 0, startedEventID: 0, identity: ): %s",
+				archiveextract.ErrInvalidArchive,
 			),
 		},
 		{
 			name: "Errors on corrupt archive",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "corrupt.zip"),
 			},
-			wantErr: "activity error (type: extract-archive-activity, scheduledEventID: 0, startedEventID: 0, identity: ): extract archive: extract: zip: not a valid zip file",
+			wantErr: "activity error (type: archive-extract, scheduledEventID: 0, startedEventID: 0, identity: ): archiveextract: extract: zip: not a valid zip file",
 		},
 		{
 			name: "Errors when source path doesn't exist",
-			params: archive.ExtractActivityParams{
+			params: archiveextract.Params{
 				SourcePath: filepath.Join("testdata", "missing.zip"),
 			},
-			wantErr: "activity error (type: extract-archive-activity, scheduledEventID: 0, startedEventID: 0, identity: ): extract archive: stat testdata/missing.zip: no such file or directory",
+			wantErr: "activity error (type: archive-extract, scheduledEventID: 0, startedEventID: 0, identity: ): archiveextract: stat testdata/missing.zip: no such file or directory",
 		},
 	} {
 		tt := tt
@@ -147,18 +147,18 @@ func TestExtractActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				archive.NewExtractActivity(tt.cfg).Execute,
-				temporalsdk_activity.RegisterOptions{Name: archive.ExtractActivityName},
+				archiveextract.New(tt.cfg).Execute,
+				temporalsdk_activity.RegisterOptions{Name: archiveextract.Name},
 			)
 
-			enc, err := env.ExecuteActivity(archive.ExtractActivityName, &tt.params)
+			enc, err := env.ExecuteActivity(archiveextract.Name, &tt.params)
 			if tt.wantErr != "" {
 				assert.Error(t, err, tt.wantErr)
 				return
 			}
 			assert.NilError(t, err)
 
-			var result archive.ExtractActivityResult
+			var result archiveextract.Result
 			_ = enc.Get(&result)
 
 			if tt.params.DestPath != "" {

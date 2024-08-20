@@ -1,4 +1,4 @@
-package bagit_test
+package bagcreate_test
 
 import (
 	"io/fs"
@@ -9,7 +9,7 @@ import (
 	"gotest.tools/v3/assert"
 	tfs "gotest.tools/v3/fs"
 
-	"github.com/artefactual-sdps/temporal-activities/bagit"
+	"github.com/artefactual-sdps/temporal-activities/bagcreate"
 )
 
 const (
@@ -48,27 +48,27 @@ func sourcePath(t *testing.T) string {
 	return td.Path()
 }
 
-func TestCreateBagActivity(t *testing.T) {
+func TestActivity(t *testing.T) {
 	t.Parallel()
 
 	type test struct {
 		name    string
-		cfg     bagit.Config
-		params  bagit.CreateBagActivityParams
+		cfg     bagcreate.Config
+		params  bagcreate.Params
 		want    tfs.Manifest
 		wantErr string
 	}
 	for _, tt := range []test{
 		{
 			name: "Creates a bag in place",
-			params: bagit.CreateBagActivityParams{
+			params: bagcreate.Params{
 				SourcePath: sourcePath(t),
 			},
 			want: testBagManifest(t),
 		},
 		{
 			name: "Creates a bag in a new dir",
-			params: bagit.CreateBagActivityParams{
+			params: bagcreate.Params{
 				SourcePath: sourcePath(t),
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test").Path(),
 			},
@@ -76,8 +76,8 @@ func TestCreateBagActivity(t *testing.T) {
 		},
 		{
 			name: "Creates a bag with SHA-256 checksums",
-			cfg:  bagit.Config{ChecksumAlgorithm: "sha256"},
-			params: bagit.CreateBagActivityParams{
+			cfg:  bagcreate.Config{ChecksumAlgorithm: "sha256"},
+			params: bagcreate.Params{
 				SourcePath: sourcePath(t),
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test").Path(),
 			},
@@ -94,18 +94,18 @@ func TestCreateBagActivity(t *testing.T) {
 		},
 		{
 			name: "Errors if source dir is empty",
-			params: bagit.CreateBagActivityParams{
+			params: bagcreate.Params{
 				SourcePath: tfs.NewDir(t, "sdps_bagit_create_test").Path(),
 			},
-			wantErr: "activity error (type: create-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): CreateBagActivity: create bag: could not create a bag, no files present in",
+			wantErr: "activity error (type: bag-create, scheduledEventID: 0, startedEventID: 0, identity: ): bagcreate: create bag: could not create a bag, no files present in",
 		},
 		{
 			name: "Errors if bag path isn't writable",
-			params: bagit.CreateBagActivityParams{
+			params: bagcreate.Params{
 				SourcePath: sourcePath(t),
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test", tfs.WithMode(0o600)).Path(),
 			},
-			wantErr: "activity error (type: create-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): CreateBagActivity: copy source dir to bag path: open",
+			wantErr: "activity error (type: bag-create, scheduledEventID: 0, startedEventID: 0, identity: ): bagcreate: copy source dir to bag path: open",
 		},
 	} {
 		tt := tt
@@ -115,18 +115,18 @@ func TestCreateBagActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				bagit.NewCreateBagActivity(tt.cfg).Execute,
-				temporalsdk_activity.RegisterOptions{Name: bagit.CreateBagActivityName},
+				bagcreate.New(tt.cfg).Execute,
+				temporalsdk_activity.RegisterOptions{Name: bagcreate.Name},
 			)
 
-			enc, err := env.ExecuteActivity(bagit.CreateBagActivityName, tt.params)
+			enc, err := env.ExecuteActivity(bagcreate.Name, tt.params)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 				return
 			}
 			assert.NilError(t, err)
 
-			var result bagit.CreateBagActivityResult
+			var result bagcreate.Result
 			_ = enc.Get(&result)
 
 			// The bag metadata (bag-info.txt, bagit.txt) are non-deterministic,

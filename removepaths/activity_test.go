@@ -1,4 +1,4 @@
-package filesys_test
+package removepaths_test
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 	"gotest.tools/v3/assert"
 	tfs "gotest.tools/v3/fs"
 
-	"github.com/artefactual-sdps/temporal-activities/filesys"
+	"github.com/artefactual-sdps/temporal-activities/removepaths"
 )
 
 func testDir(t *testing.T) *tfs.Dir {
@@ -28,13 +28,13 @@ func TestActivity(t *testing.T) {
 
 	type test struct {
 		name   string
-		params filesys.RemoveActivityParams
+		params removepaths.Params
 		wantFs tfs.Manifest
 	}
 	for _, tt := range []test{
 		{
 			name: "Deletes the given paths",
-			params: filesys.RemoveActivityParams{
+			params: removepaths.Params{
 				Paths: []string{
 					"delete_dir",
 					"delete2.txt",
@@ -46,7 +46,7 @@ func TestActivity(t *testing.T) {
 		},
 		{
 			name: "No error when a path doesn't exist",
-			params: filesys.RemoveActivityParams{
+			params: removepaths.Params{
 				Paths: []string{
 					"delete_dir",
 					"delete2.txt",
@@ -66,8 +66,8 @@ func TestActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				filesys.NewRemoveActivity().Execute,
-				temporalsdk_activity.RegisterOptions{Name: filesys.RemoveActivityName},
+				removepaths.New().Execute,
+				temporalsdk_activity.RegisterOptions{Name: removepaths.Name},
 			)
 
 			td := testDir(t)
@@ -75,12 +75,12 @@ func TestActivity(t *testing.T) {
 				tt.params.Paths[i] = td.Join(p)
 			}
 
-			enc, err := env.ExecuteActivity(filesys.RemoveActivityName, &tt.params)
+			enc, err := env.ExecuteActivity(removepaths.Name, &tt.params)
 			assert.NilError(t, err)
 
-			var result filesys.RemoveActivityResult
+			var result removepaths.Result
 			_ = enc.Get(&result)
-			assert.Equal(t, result, filesys.RemoveActivityResult{})
+			assert.Equal(t, result, removepaths.Result{})
 			assert.Assert(t, tfs.Equal(td.Path(), tt.wantFs))
 		})
 	}

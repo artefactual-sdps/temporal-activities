@@ -1,11 +1,11 @@
-package bagit_test
+package bagcreate_test
 
 import (
 	"testing"
 
 	"gotest.tools/v3/assert"
 
-	"github.com/artefactual-sdps/temporal-activities/bagit"
+	"github.com/artefactual-sdps/temporal-activities/bagcreate"
 )
 
 func TestValidate(t *testing.T) {
@@ -13,18 +13,18 @@ func TestValidate(t *testing.T) {
 
 	type test struct {
 		name    string
-		cfg     bagit.Config
+		cfg     bagcreate.Config
 		wantErr string
 	}
 
 	for _, tt := range []test{
 		{
 			name: "No errors on valid config",
-			cfg:  bagit.Config{ChecksumAlgorithm: "md5"},
+			cfg:  bagcreate.Config{ChecksumAlgorithm: "md5"},
 		},
 		{
 			name:    "Errors on invalid ChecksumAlgorithm",
-			cfg:     bagit.Config{ChecksumAlgorithm: "foo"},
+			cfg:     bagcreate.Config{ChecksumAlgorithm: "foo"},
 			wantErr: "ChecksumAlgorithm: invalid value \"foo\", must be one of (md5, sha1, sha256, sha512)",
 		},
 	} {

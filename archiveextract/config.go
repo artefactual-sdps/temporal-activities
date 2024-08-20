@@ -1,4 +1,4 @@
-package archive
+package archiveextract
 
 import (
 	"io/fs"

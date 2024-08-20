@@ -1,7 +1,8 @@
-package bagit_test
+package bagvalidate_test
 
 import (
 	"errors"
+	"io/fs"
 	"testing"
 
 	bagit_gython "github.com/artefactual-labs/bagit-gython"
@@ -10,14 +11,22 @@ import (
 	"gotest.tools/v3/assert"
 	tfs "gotest.tools/v3/fs"
 
-	"github.com/artefactual-sdps/temporal-activities/bagit"
+	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
+)
+
+const (
+	dirMode        fs.FileMode = 0o700
+	fileMode       fs.FileMode = 0o600
+	sha512manifest string      = `946af3bfd3b0b84ea0d99136085dcd66ee7e769371dbcd097ed35fd377116087e25d004afd68dc48e4eb0bcb6a434b04078577b531a7da1452296d1ae98d20b3  data/another.txt
+8cbdd4ed5452f7c066509c066d5ea87fc03f30b0c67153624a1bce4d6e14b6709b5e78caf723cdf419d0efad4db96ba1cad3196783c26a7743029459bdd148b0  data/small.txt
+`
 )
 
 func validTestBag(t *testing.T) string {
 	d := tfs.NewDir(t, "temporal-activities-test",
 		tfs.WithFile(
 			"bag-info.txt",
-			`Bag-Software-Agent: bagit.py v1.8.1 <https://github.com/LibraryOfCongress/bagit-python>
+			`Bag-Software-Agent: bagvalidate.py v1.8.1 <https://github.com/LibraryOfCongress/bagit-python>
 Bagging-Date: 2024-07-04
 Payload-Oxum: 38.2
 `,
@@ -44,7 +53,7 @@ func invalidTestBag(t *testing.T) string {
 	d := tfs.NewDir(t, "temporal-activities-test",
 		tfs.WithFile(
 			"bag-info.txt",
-			`Bag-Software-Agent: bagit.py v1.8.1 <https://github.com/LibraryOfCongress/bagit-python>
+			`Bag-Software-Agent: bagvalidate.py v1.8.1 <https://github.com/LibraryOfCongress/bagit-python>
 Bagging-Date: 2024-07-04
 Payload-Oxum: 38.2
 `,
@@ -66,7 +75,7 @@ Tag-File-Character-Encoding: UTF-8`,
 	return d.Path()
 }
 
-func setup(t *testing.T) bagit.BagValidator {
+func setup(t *testing.T) bagvalidate.BagValidator {
 	validator, err := bagit_gython.NewBagIt()
 	if err != nil {
 		t.Fatalf("setup: %v", err)
@@ -76,31 +85,30 @@ func setup(t *testing.T) bagit.BagValidator {
 	return validator
 }
 
-func TestValidateActivity(t *testing.T) {
+func TestActivity(t *testing.T) {
 	t.Parallel()
 
 	type test struct {
-		name    string
-		params  bagit.ValidateActivityParams
-		want    bagit.ValidateActivityResult
-		wantErr string
+		name   string
+		params bagvalidate.Params
+		want   bagvalidate.Result
 	}
 	for _, tt := range []test{
 		{
 			name: "Validates a bag",
-			params: bagit.ValidateActivityParams{
+			params: bagvalidate.Params{
 				Path: validTestBag(t),
 			},
-			want: bagit.ValidateActivityResult{
+			want: bagvalidate.Result{
 				Valid: true,
 			},
 		},
 		{
 			name: "Returns a validation error",
-			params: bagit.ValidateActivityParams{
+			params: bagvalidate.Params{
 				Path: invalidTestBag(t),
 			},
-			want: bagit.ValidateActivityResult{
+			want: bagvalidate.Result{
 				Valid: false,
 				Error: "invalid: Payload-Oxum validation failed. Expected 2 files and 38 bytes but found 1 files and 19 bytes",
 			},
@@ -114,40 +122,35 @@ func TestValidateActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				bagit.NewValidateActivity(validator).Execute,
-				temporalsdk_activity.RegisterOptions{Name: bagit.ValidateActivityName},
+				bagvalidate.New(validator).Execute,
+				temporalsdk_activity.RegisterOptions{Name: bagvalidate.Name},
 			)
 
-			enc, err := env.ExecuteActivity(bagit.ValidateActivityName, tt.params)
-			if tt.wantErr != "" {
-				assert.ErrorIs(t, err, bagit.ErrInvalid)
-				assert.ErrorContains(t, err, tt.wantErr)
-				return
-			}
+			enc, err := env.ExecuteActivity(bagvalidate.Name, tt.params)
 			assert.NilError(t, err)
 
-			var result bagit.ValidateActivityResult
+			var result bagvalidate.Result
 			_ = enc.Get(&result)
 			assert.DeepEqual(t, result, tt.want)
 		})
 	}
 }
 
-func TestValidateSystemError(t *testing.T) {
+func TestActivitySystemError(t *testing.T) {
 	t.Parallel()
 
-	validator := bagit.NewMockValidator().SetErr(errors.New("transporter accident"))
+	validator := bagvalidate.NewMockValidator().SetErr(errors.New("transporter accident"))
 	ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 	env := ts.NewTestActivityEnvironment()
 	env.RegisterActivityWithOptions(
-		bagit.NewValidateActivity(validator).Execute,
-		temporalsdk_activity.RegisterOptions{Name: bagit.ValidateActivityName},
+		bagvalidate.New(validator).Execute,
+		temporalsdk_activity.RegisterOptions{Name: bagvalidate.Name},
 	)
 
-	_, err := env.ExecuteActivity(bagit.ValidateActivityName, bagit.ValidateActivityParams{})
+	_, err := env.ExecuteActivity(bagvalidate.Name, bagvalidate.Params{})
 	assert.Error(
 		t,
 		err,
-		"activity error (type: validate-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): bagit validate activity: transporter accident",
+		"activity error (type: bag-validate, scheduledEventID: 0, startedEventID: 0, identity: ): bagvalidate: transporter accident",
 	)
 }

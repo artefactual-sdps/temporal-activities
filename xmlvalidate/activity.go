@@ -1,8 +1,9 @@
-package xml
+package xmlvalidate
 
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,41 +11,38 @@ import (
 	"go.artefactual.dev/tools/temporal"
 )
 
-const XSDValidateActivityName = "xsd-validate-activity"
+const Name = "xml-validate"
 
-type XSDValidateActivity struct{}
+type (
+	Params struct {
+		// XMLFilePath is the path of the file to be validated.
+		XMLFilePath string
 
-func NewXSDValidateActivity() *XSDValidateActivity {
-	return &XSDValidateActivity{}
-}
+		// XSDFilePath is the path of the XSD file to use for validation.
+		XSDFilePath string
+	}
+	Result struct {
+		Failures []byte
+	}
+	Activity struct{}
+)
 
-type XSDValidateActivityParams struct {
-	// XMLFilePath is the path of the file to be validated.
-	XMLFilePath string
-
-	// XSDFilePath is the path of the XSD file to use for validation.
-	XSDFilePath string
-}
-
-type XSDValidateActivityResult struct {
-	Failures []byte
+func New() *Activity {
+	return &Activity{}
 }
 
 // Execute checks an XML file using the XSD file provided and returns error output.
-func (a *XSDValidateActivity) Execute(
-	ctx context.Context,
-	params *XSDValidateActivityParams,
-) (*XSDValidateActivityResult, error) {
+func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
-	logger.V(1).Info("Executing XMLValidateActivity", "XMLFilePath", params.XMLFilePath)
+	logger.V(1).Info("Executing xml-validate activity", "XMLFilePath", params.XMLFilePath)
 
 	// Check XML file using XSD.
 	lintErrors, err := checkXML(ctx, params.XMLFilePath, params.XSDFilePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("xmlvalidate: %w", err)
 	}
 
-	return &XSDValidateActivityResult{Failures: lintErrors}, nil
+	return &Result{Failures: lintErrors}, nil
 }
 
 func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) ([]byte, error) {

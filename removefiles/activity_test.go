@@ -18,8 +18,8 @@ func TestActivity(t *testing.T) {
 
 	type Test struct {
 		name            string
-		params          removefiles.ActivityParams
-		want            removefiles.ActivityResult
+		params          removefiles.Params
+		want            removefiles.Result
 		wantFs          tfs.Manifest
 		wantErr         string
 		wantPathInError bool
@@ -27,7 +27,7 @@ func TestActivity(t *testing.T) {
 	for _, tt := range []Test{
 		{
 			name: "Deletes all .DS_Store files",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile(".DS_Store", "delete me."),
 					tfs.WithFile("keepme", "don't delete me."),
@@ -38,7 +38,7 @@ func TestActivity(t *testing.T) {
 				).Path(),
 				RemoveNames: []string{"Thumbs.db", ".DS_Store"},
 			},
-			want: removefiles.ActivityResult{Count: 2},
+			want: removefiles.Result{Count: 2},
 			wantFs: tfs.Expected(t,
 				tfs.WithFile("keepme", "don't delete me."),
 				tfs.WithDir("subdir",
@@ -48,7 +48,7 @@ func TestActivity(t *testing.T) {
 		},
 		{
 			name: "Deletes a .git directory",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile("keepme", "don't delete me."),
 					tfs.WithDir(".git",
@@ -64,20 +64,20 @@ func TestActivity(t *testing.T) {
 				).Path(),
 				RemoveNames: []string{".git"},
 			},
-			want: removefiles.ActivityResult{Count: 1},
+			want: removefiles.Result{Count: 1},
 			wantFs: tfs.Expected(t,
 				tfs.WithFile("keepme", "don't delete me."),
 			),
 		},
 		{
 			name: "Does nothing when no remove names/patterns given",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile(".DS_Store", "delete me."),
 					tfs.WithFile("keepme", "don't delete me."),
 				).Path(),
 			},
-			want: removefiles.ActivityResult{Count: 0},
+			want: removefiles.Result{Count: 0},
 			wantFs: tfs.Expected(t,
 				tfs.WithFile(".DS_Store", "delete me."),
 				tfs.WithFile("keepme", "don't delete me."),
@@ -85,28 +85,28 @@ func TestActivity(t *testing.T) {
 		},
 		{
 			name: "Errors if Path doesn't exist",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path:        "not_there",
 				RemoveNames: []string{"Thumbs.db", ".DS_Store"},
 			},
-			wantErr:         "activity error (type: remove-files-activity, scheduledEventID: 0, startedEventID: 0, identity: ): RemoveFilesActivity: remove: stat %s: no such file or directory",
+			wantErr:         "activity error (type: remove-files, scheduledEventID: 0, startedEventID: 0, identity: ): removefiles: remove: stat %s: no such file or directory",
 			wantPathInError: true,
 		},
 		{
 			name: "Errors if path is not a directory",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path: tfs.NewDir(t, "remove-files-test",
 					tfs.WithFile(".DS_Store", "delete me."),
 					tfs.WithFile("keepme", "don't delete me."),
 				).Join("keepme"),
 				RemoveNames: []string{"Thumbs.db", ".DS_Store"},
 			},
-			wantErr:         "activity error (type: remove-files-activity, scheduledEventID: 0, startedEventID: 0, identity: ): RemoveFilesActivity: remove: path: %q: not a directory",
+			wantErr:         "activity error (type: remove-files, scheduledEventID: 0, startedEventID: 0, identity: ): removefiles: remove: path: %q: not a directory",
 			wantPathInError: true,
 		},
 		{
 			name: "Deletes based on regular expressions",
-			params: removefiles.ActivityParams{
+			params: removefiles.Params{
 				Path: tfs.NewDir(t, "remove-files-activity-test",
 					tfs.WithFile("001_premis.xml", "delete me."),
 					tfs.WithFile("keepme", "don't delete me."),
@@ -120,7 +120,7 @@ func TestActivity(t *testing.T) {
 					regexp.MustCompile("(?i)mets.xml$"),
 				},
 			},
-			want: removefiles.ActivityResult{Count: 2},
+			want: removefiles.Result{Count: 2},
 			wantFs: tfs.Expected(t,
 				tfs.WithFile("keepme", "don't delete me."),
 				tfs.WithDir("subdir",
@@ -137,11 +137,11 @@ func TestActivity(t *testing.T) {
 			ts := &temporalsdk_testsuite.WorkflowTestSuite{}
 			env := ts.NewTestActivityEnvironment()
 			env.RegisterActivityWithOptions(
-				removefiles.NewActivity().Execute,
-				temporalsdk_activity.RegisterOptions{Name: removefiles.ActivityName},
+				removefiles.New().Execute,
+				temporalsdk_activity.RegisterOptions{Name: removefiles.Name},
 			)
 
-			enc, err := env.ExecuteActivity(removefiles.ActivityName, &tt.params)
+			enc, err := env.ExecuteActivity(removefiles.Name, &tt.params)
 
 			if tt.wantErr != "" {
 				if tt.wantPathInError {
@@ -152,7 +152,7 @@ func TestActivity(t *testing.T) {
 			}
 			assert.NilError(t, err)
 
-			var result removefiles.ActivityResult
+			var result removefiles.Result
 			_ = enc.Get(&result)
 			assert.Equal(t, result, tt.want)
 			assert.Assert(t, tfs.Equal(tt.params.Path, tt.wantFs))

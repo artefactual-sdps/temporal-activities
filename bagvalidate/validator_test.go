@@ -1,14 +1,14 @@
-package bagit_test
+package bagvalidate_test
 
 import (
 	"testing"
 
 	"gotest.tools/v3/assert"
 
-	"github.com/artefactual-sdps/temporal-activities/bagit"
+	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
 )
 
 func TestNoopValidator(t *testing.T) {
-	v := bagit.NewNoopValidator()
+	v := bagvalidate.NewNoopValidator()
 	assert.NilError(t, v.Validate(""))
 }

@@ -1,4 +1,4 @@
-package bagit_test
+package bagvalidate_test
 
 import (
 	"errors"
@@ -6,28 +6,28 @@ import (
 
 	"gotest.tools/v3/assert"
 
-	"github.com/artefactual-sdps/temporal-activities/bagit"
+	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
 )
 
 func TestMockValidator(t *testing.T) {
 	t.Parallel()
 	t.Run("Return a nil error", func(t *testing.T) {
 		t.Parallel()
-		v := bagit.NewMockValidator()
+		v := bagvalidate.NewMockValidator()
 		assert.NilError(t, v.Validate(""))
 	})
 
 	t.Run("Return an ErrInvalid error", func(t *testing.T) {
 		t.Parallel()
-		v := bagit.NewMockValidator().SetErr(bagit.ErrInvalid)
-		assert.ErrorIs(t, v.Validate(""), bagit.ErrInvalid)
+		v := bagvalidate.NewMockValidator().SetErr(bagvalidate.ErrInvalid)
+		assert.ErrorIs(t, v.Validate(""), bagvalidate.ErrInvalid)
 	})
 
 	t.Run("Return a general error", func(t *testing.T) {
 		t.Parallel()
-		v := bagit.NewMockValidator().SetErr(errors.New("system error"))
+		v := bagvalidate.NewMockValidator().SetErr(errors.New("system error"))
 		err := v.Validate("")
-		assert.Assert(t, !errors.Is(err, bagit.ErrInvalid))
+		assert.Assert(t, !errors.Is(err, bagvalidate.ErrInvalid))
 		assert.Error(t, err, "system error")
 	})
 }

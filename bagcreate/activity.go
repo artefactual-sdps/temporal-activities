@@ -1,4 +1,4 @@
-package bagit
+package bagcreate
 
 import (
 	"context"
@@ -12,35 +12,34 @@ import (
 )
 
 const (
-	CreateBagActivityName = "create-bag-activity"
-
+	Name                 = "bag-create"
 	dirMode  fs.FileMode = 0o700
 	fileMode fs.FileMode = 0o600
 )
 
-type CreateBagActivity struct {
-	cfg *Config
-}
+type (
+	Params struct {
+		// SourcePath is the path of the files to be added to the created Bag.
+		SourcePath string
 
-func NewCreateBagActivity(cfg Config) *CreateBagActivity {
+		// BagPath is the path where the Bag should be created. If BagPath is empty,
+		// then the Bag will be created at SourcePath, replacing the original
+		// directory contents.
+		BagPath string
+	}
+	Result struct {
+		// BagPath of the path to the created Bag.
+		BagPath string
+	}
+	Activity struct {
+		cfg *Config
+	}
+)
+
+func New(cfg Config) *Activity {
 	cfg.setDefaults()
 
-	return &CreateBagActivity{cfg: &cfg}
-}
-
-type CreateBagActivityParams struct {
-	// SourcePath is the path of the files to be added to the created Bag.
-	SourcePath string
-
-	// BagPath is the path where the Bag should be created. If BagPath is empty,
-	// then the Bag will be created at SourcePath, replacing the original
-	// directory contents.
-	BagPath string
-}
-
-type CreateBagActivityResult struct {
-	// BagPath of the path to the created Bag.
-	BagPath string
+	return &Activity{cfg: &cfg}
 }
 
 // Execute creates a BagIt Bag containing the files at SourcePath.
@@ -49,24 +48,21 @@ type CreateBagActivityResult struct {
 // If BagPath is empty, then the Bag will be created at SourcePath, replacing
 // the original directory contents. In either case the path of the Bag is
 // returned.
-func (a *CreateBagActivity) Execute(
-	ctx context.Context,
-	params *CreateBagActivityParams,
-) (*CreateBagActivityResult, error) {
+func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
-	logger.V(1).Info("Executing CreateBagActivity", "SourcePath", params.SourcePath)
+	logger.V(1).Info("Executing bag-create activity", "SourcePath", params.SourcePath)
 
 	dest, err := a.create(params.SourcePath, params.BagPath)
 	if err != nil {
-		return nil, fmt.Errorf("CreateBagActivity: %v", err)
+		return nil, fmt.Errorf("bagcreate: %v", err)
 	}
 
-	return &CreateBagActivityResult{BagPath: dest}, nil
+	return &Result{BagPath: dest}, nil
 }
 
 // create creates a BagIt Bag at dest from the files at src. If dest is empty,
 // the BagIt Bag is created in-place at src.
-func (a *CreateBagActivity) create(src, dest string) (string, error) {
+func (a *Activity) create(src, dest string) (string, error) {
 	if dest == "" {
 		dest = src
 	} else {

@@ -1,4 +1,8 @@
-package bagit
+package bagvalidate
+
+type BagValidator interface {
+	Validate(path string) error
+}
 
 type noopValidator struct{}
 

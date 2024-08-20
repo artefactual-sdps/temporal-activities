@@ -32,6 +32,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-golangci-lint-cache-
       - name: Run golangci-lint
-        run: make lint
+        run: |
+          make lint
+            if [ -n "$(git status --porcelain)" ]; then
+              printf "golangci-lint reported necessary changes\n"
+              git diff
+              exit 1
+            fi
         env:
           GOLANGCI_LINT_CACHE: ${{ runner.temp }}/golangci-lint-cache
+  golines:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Read Go version
+        id: go_version
+        run: echo "go_version=$(cat .go-version)" >> $GITHUB_OUTPUT
+      - name: Install Go (${{ steps.go_version.outputs.go_version }})
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go_version.outputs.go_version }}
+      - name: Run golines
+        run: |
+          make golines
+          if [ -n "$(git status --porcelain)" ]; then
+            printf "golines reported necessary changes\n"
+            git diff
+            exit 1
+          fi

@@ -47,7 +47,7 @@ func (a *XSDValidateActivity) Execute(
 	return &XSDValidateActivityResult{Failures: lintErrors}, nil
 }
 
-func checkXML(ctx context.Context, xmlFilePath string, xsdFilePath string) ([]byte, error) {
+func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) ([]byte, error) {
 	toolFilePath, err := exec.LookPath("xmllint")
 	if err != nil {
 		return nil, err

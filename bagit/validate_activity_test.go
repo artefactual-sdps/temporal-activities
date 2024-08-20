@@ -145,5 +145,9 @@ func TestValidateSystemError(t *testing.T) {
 	)
 
 	_, err := env.ExecuteActivity(bagit.ValidateActivityName, bagit.ValidateActivityParams{})
-	assert.Error(t, err, "activity error (type: validate-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): bagit validate activity: transporter accident")
+	assert.Error(
+		t,
+		err,
+		"activity error (type: validate-bag-activity, scheduledEventID: 0, startedEventID: 0, identity: ): bagit validate activity: transporter accident",
+	)
 }

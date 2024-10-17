@@ -57,7 +57,7 @@ func TestActivity(t *testing.T) {
 					params.XMLFilePath,
 				)
 
-				return xmlvalidate.Result{Failures: []byte(invalidXMLFailures)}
+				return xmlvalidate.Result{Failures: []string{invalidXMLFailures}}
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func TestActivity(t *testing.T) {
 					params.XSDFilePath,
 				)
 
-				return xmlvalidate.Result{Failures: []byte(invalidXSDFailures)}
+				return xmlvalidate.Result{Failures: []string{invalidXSDFailures}}
 			},
 		},
 		{

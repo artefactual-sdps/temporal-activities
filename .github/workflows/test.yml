@@ -24,6 +24,8 @@ jobs:
         cache: true
     - name: Test
       run: make test-ci
+      env:
+        SDPS_TEST_XMLLINT: 1
     - name: Determine skip-codecov
       uses: actions/github-script@v7
       id: skip-codecov

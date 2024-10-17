@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# Test coverage report
+/covreport
+
+# VS Code workspace file
+*.code-workspace

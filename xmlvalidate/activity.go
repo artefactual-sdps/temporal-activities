@@ -22,7 +22,7 @@ type (
 		XSDFilePath string
 	}
 	Result struct {
-		Failures []byte
+		Failures []string
 	}
 	Activity struct{}
 )
@@ -37,30 +37,35 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	logger.V(1).Info("Executing xml-validate activity", "XMLFilePath", params.XMLFilePath)
 
 	// Check XML file using XSD.
-	lintErrors, err := checkXML(ctx, params.XMLFilePath, params.XSDFilePath)
+	out, err := checkXML(ctx, params.XMLFilePath, params.XSDFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("xmlvalidate: %w", err)
 	}
 
-	return &Result{Failures: lintErrors}, nil
+	var failures []string
+	if out != "" {
+		failures = []string{out}
+	}
+
+	return &Result{Failures: failures}, nil
 }
 
-func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) ([]byte, error) {
+func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) (string, error) {
 	toolFilePath, err := exec.LookPath("xmllint")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	xsdFilePath = filepath.Clean(xsdFilePath)
 	_, err = os.Stat(xsdFilePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	xmlFilePath = filepath.Clean(xmlFilePath)
 	_, err = os.Stat(xmlFilePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	cmd := exec.CommandContext(ctx, toolFilePath, "--schema", xsdFilePath, xmlFilePath, "--noout") // #nosec G204
@@ -70,8 +75,8 @@ func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) ([]byte, err
 
 	err = cmd.Run()
 	if err != nil {
-		return stderr.Bytes(), nil
+		return stderr.String(), nil
 	}
 
-	return nil, err
+	return "", err
 }

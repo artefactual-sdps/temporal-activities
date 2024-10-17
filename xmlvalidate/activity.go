@@ -1,43 +1,55 @@
 package xmlvalidate
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 
 	"go.artefactual.dev/tools/temporal"
 )
 
 const Name = "xml-validate"
 
+// An XSDValidator validates the XML document at xmlPath against the XSD schema
+// at xsdPath.
+type XSDValidator interface {
+	Validate(ctx context.Context, xmlPath, xsdPath string) (string, error)
+}
+
 type (
 	Params struct {
-		// XMLFilePath is the path of the file to be validated.
-		XMLFilePath string
+		// XMLPath is the path of the file to be validated.
+		XMLPath string
 
-		// XSDFilePath is the path of the XSD file to use for validation.
-		XSDFilePath string
+		// XSDPath is the path of the XSD file to use for validation.
+		XSDPath string
 	}
 	Result struct {
 		Failures []string
 	}
-	Activity struct{}
+	Activity struct {
+		validator XSDValidator
+	}
 )
 
-func New() *Activity {
-	return &Activity{}
+func New(validator XSDValidator) *Activity {
+	return &Activity{validator: validator}
 }
 
 // Execute checks an XML file using the XSD file provided and returns error output.
 func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
-	logger.V(1).Info("Executing xml-validate activity", "XMLFilePath", params.XMLFilePath)
+	logger.V(1).Info("Executing xml-validate activity", "XMLPath", params.XMLPath)
 
-	// Check XML file using XSD.
-	out, err := checkXML(ctx, params.XMLFilePath, params.XSDFilePath)
+	if _, err := os.Stat(params.XMLPath); err != nil {
+		return nil, err
+	}
+	if _, err := os.Stat(params.XSDPath); err != nil {
+		return nil, err
+	}
+
+	// Validate XML file against XSD.
+	out, err := a.validator.Validate(ctx, params.XMLPath, params.XSDPath)
 	if err != nil {
 		return nil, fmt.Errorf("xmlvalidate: %w", err)
 	}
@@ -48,35 +60,4 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	}
 
 	return &Result{Failures: failures}, nil
-}
-
-func checkXML(ctx context.Context, xmlFilePath, xsdFilePath string) (string, error) {
-	toolFilePath, err := exec.LookPath("xmllint")
-	if err != nil {
-		return "", err
-	}
-
-	xsdFilePath = filepath.Clean(xsdFilePath)
-	_, err = os.Stat(xsdFilePath)
-	if err != nil {
-		return "", err
-	}
-
-	xmlFilePath = filepath.Clean(xmlFilePath)
-	_, err = os.Stat(xmlFilePath)
-	if err != nil {
-		return "", err
-	}
-
-	cmd := exec.CommandContext(ctx, toolFilePath, "--schema", xsdFilePath, xmlFilePath, "--noout") // #nosec G204
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
-	if err != nil {
-		return stderr.String(), nil
-	}
-
-	return "", err
 }

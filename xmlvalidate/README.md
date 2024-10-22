@@ -5,7 +5,7 @@ Validates an XML file against an XSD schema using `xmlint`.
 ## Requirements
 
 This activity requires the `xmllint` command be installed on the system where
-the activity worker is running. This can be installed, in Ubuntu, by entering
+the activity worker is running. This can be installed in Ubuntu by entering
 the following command:
 
 ```bash
@@ -52,16 +52,35 @@ ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
     RetryPolicy: &temporal.RetryPolicy{MaximumAttempts: 1},
 })
 
-var re xmlvalidate.Result
+var result xmlvalidate.Result
 err := workflow.ExecuteActivity(
     ctx,
     xmlvalidate.Name,
     &xmlvalidate.Params{
-        XMLFilePath: "/path/to/file.xml",
-        XSDFilePath: "/path/to/file.xsd",
+        XMLPath: "/path/to/file.xml",
+        XSDPath: "/path/to/file.xsd",
     },
-).Get(ctx, &re)
+).Get(ctx, &result)
 ```
 
-`err` may contain any non validation error. `re.Failures` contains the
-`xmllint` validation output as `[]bytes`.
+`err` may contain any non validation error. `result.Failures` encodes the
+`xmllint` validation stderr output as `[]string`.
+
+## Command
+
+XMLValidate includes a command-line entry point that can be executed with
+`go run`, e.g.:
+
+```bash
+go run ./xmlvalidate/cmd --xsd xmvalidate/testdata/person.xsd \
+xmlvalidate/testdata/person_invalid.xml
+```
+
+If validation is successful `xmlvalidate` will write "OK" to stdout and exit
+with status code: 0.
+
+If a validation error is encountered, `xmlvalidate` will write the validation
+error to stdout, and will exit with status code: 0.
+
+If a non-validation error is encountered, `xmlvalidate` will write the error
+message to stderr, and exit with status code: 1.

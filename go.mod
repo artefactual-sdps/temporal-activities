@@ -8,6 +8,8 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af
 	github.com/otiai10/copy v1.14.0
+	github.com/richardlehane/siegfried v1.11.1
+	github.com/tonglil/buflogr v1.1.1
 	go.artefactual.dev/tools v0.14.0
 	go.temporal.io/sdk v1.26.1
 	gocloud.dev v0.39.0
@@ -42,8 +44,15 @@ require (
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/richardlehane/characterize v1.0.0 // indirect
+	github.com/richardlehane/match v1.0.5 // indirect
+	github.com/richardlehane/mscfb v1.0.4 // indirect
+	github.com/richardlehane/msoleps v1.0.3 // indirect
+	github.com/richardlehane/xmldetect v1.0.2 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/ross-spencer/spargo v0.4.1 // indirect
+	github.com/ross-spencer/wikiprov v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
@@ -53,6 +62,7 @@ require (
 	go.temporal.io/api v1.32.0 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
+	golang.org/x/image v0.17.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect

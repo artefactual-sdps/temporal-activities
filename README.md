@@ -15,6 +15,7 @@ configuration.
 - [bucketdelete](#bucketdelete)
 - [bucketdownload](#bucketdownload)
 - [bucketupload](#bucketupload)
+- [ffvalidate](#ffvalidate)
 - [removefiles](#removefiles)
 - [removepaths](#removepaths)
 - [xmlvalidate](#xmlvalidate)
@@ -60,6 +61,12 @@ Downloads a file/blob from a configured bucket.
 Uploads a file/blob to a configured bucket.
 
 [Read more](./bucketupload/README.md)
+
+### ffvalidate
+
+Validates files against a list of allowed file formats.
+
+[Read more](./ffvalidate/README.md)
 
 ### removefiles
 

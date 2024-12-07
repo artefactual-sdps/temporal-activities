@@ -2,19 +2,17 @@ package bagvalidate
 
 import (
 	"errors"
-	"fmt"
 	"strings"
-
-	bagit_gython "github.com/artefactual-labs/bagit-gython"
 )
+
+var ErrNotABag = errors.New("not a bag")
 
 var ErrInvalid = errors.New("invalid")
 
-func convertError(err error) error {
-	if errors.Is(err, bagit_gython.ErrInvalid) {
-		msg, _ := strings.CutPrefix(err.Error(), "invalid: ")
-		err = fmt.Errorf("%w: %s", ErrInvalid, msg)
-	}
+func RemovePathFromError(path string, err error) string {
+	// Remove path from validation messages.
+	message := strings.Replace(err.Error(), path+" is invalid: ", "", 1)
 
-	return err
+	// Convert to lower case.
+	return strings.ToLower(message)
 }

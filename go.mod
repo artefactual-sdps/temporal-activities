@@ -3,7 +3,6 @@ module github.com/artefactual-sdps/temporal-activities
 go 1.21.4
 
 require (
-	github.com/artefactual-labs/bagit-gython v0.2.0
 	github.com/google/safeopen v0.0.0-20240125081138-66b54d5181c6
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af
@@ -39,7 +38,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
-	github.com/kluctl/go-embed-python v0.0.0-3.12.3-20240415-1 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
@@ -53,7 +51,6 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/ross-spencer/spargo v0.4.1 // indirect
 	github.com/ross-spencer/wikiprov v0.2.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect

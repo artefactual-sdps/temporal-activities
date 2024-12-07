@@ -3,7 +3,6 @@ package bagvalidate
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"go.artefactual.dev/tools/temporal"
 )
@@ -44,14 +43,14 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	logger.V(1).Info("Executing bag-validate activity", "Path", params.Path)
 
 	if err := a.validator.Validate(params.Path); err != nil {
-		if errors.Is(convertError(err), ErrInvalid) {
-			return &Result{
-				Valid: false,
-				Error: err.Error(),
-			}, nil
+		wrappedErr := errors.Unwrap(err)
+
+		// Handle application errors.
+		if wrappedErr != ErrNotABag && wrappedErr != ErrInvalid {
+			return nil, err
 		}
 
-		return nil, fmt.Errorf("bagvalidate: %v", err)
+		return &Result{Valid: false, Error: err.Error()}, nil
 	}
 
 	return &Result{Valid: true}, nil

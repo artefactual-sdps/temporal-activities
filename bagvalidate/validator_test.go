@@ -36,6 +36,12 @@ c4600f10b98eb9f179781387e7ce80ff89b4a29793be74ccd037b44b0bf27c00 bag-info.txt
 func TestValidator(t *testing.T) {
 	t.Parallel()
 
+	nonBag := fs.NewDir(t, "",
+		fs.WithDir("data",
+			fs.WithFile("test-file.txt", textFileTxtCorrect),
+		),
+	)
+
 	validBag := fs.NewDir(t, "",
 		fs.WithDir("data",
 			fs.WithFile("test-file.txt", textFileTxtCorrect),
@@ -62,6 +68,11 @@ func TestValidator(t *testing.T) {
 		wantErr string
 	}{
 		{
+			name:    "Validate non-bag",
+			bagPath: nonBag.Path(),
+			wantErr: "bagit.txt: no such file or directory",
+		},
+		{
 			name:    "Validate valid bag",
 			bagPath: validBag.Path(),
 		},
@@ -73,13 +84,15 @@ func TestValidator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			v := bagvalidate.NewValidator()
 			err := v.Validate(tt.bagPath)
 
-			if tt.wantErr != "" && !strings.Contains(err.Error(), tt.wantErr) {
-				t.Errorf("error is nil, expecting: %q", tt.wantErr)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Errorf("error is nil, expecting: %q", tt.wantErr)
+				} else if !strings.Contains(err.Error(), tt.wantErr) {
+					assert.ErrorContains(t, err, tt.wantErr)
+				}
 			}
 		})
 	}

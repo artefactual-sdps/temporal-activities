@@ -2,7 +2,6 @@ package bagvalidate_test
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"testing"
 
@@ -122,7 +121,6 @@ func TestActivity(t *testing.T) {
 
 			// Test activity result.
 			var result bagvalidate.Result
-			fmt.Println(result)
 			_ = enc.Get(&result)
 			assert.DeepEqual(t, result, tt.want)
 		})

@@ -5,9 +5,11 @@ import (
 	"strings"
 )
 
-var ErrNotABag = errors.New("not a bag")
+var (
+	ErrNotABag = errors.New("not a bag")
 
-var ErrInvalid = errors.New("invalid")
+	ErrInvalid = errors.New("invalid")
+)
 
 func RemovePathFromError(path string, err error) string {
 	// Remove path from validation messages.

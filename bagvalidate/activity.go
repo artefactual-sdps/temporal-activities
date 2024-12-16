@@ -43,10 +43,8 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	logger.V(1).Info("Executing bag-validate activity", "Path", params.Path)
 
 	if err := a.validator.Validate(params.Path); err != nil {
-		wrappedErr := errors.Unwrap(err)
-
 		// Handle application errors.
-		if wrappedErr != ErrNotABag && wrappedErr != ErrInvalid {
+		if !errors.Is(err, ErrNotABag) && !errors.Is(err, ErrInvalid) {
 			return nil, err
 		}
 

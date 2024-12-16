@@ -100,7 +100,7 @@ func TestActivity(t *testing.T) {
 			},
 			want: bagvalidate.Result{
 				Valid: false,
-				Error: "invalid: payload-oxum validation failed. expected 2 files and 38 bytes but found 1 files and 19 bytes",
+				Error: "invalid: Payload-Oxum validation failed. Expected 2 files and 38 bytes but found 1 files and 19 bytes",
 			},
 		},
 	} {

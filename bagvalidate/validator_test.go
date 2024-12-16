@@ -69,7 +69,7 @@ func TestValidator(t *testing.T) {
 				fs.WithFile("manifest-sha256.txt", manifestSha256Txt),
 				fs.WithFile("tagmanifest-sha256.txt", tagManifestSha256Text),
 			).Path(),
-			wantErr: "payload-oxum validation failed. expected 1 files and 20 bytes but found 1 files and 13 bytes",
+			wantErr: "Payload-Oxum validation failed. Expected 1 files and 20 bytes but found 1 files and 13 bytes",
 		},
 	}
 	for _, tt := range tests {

@@ -1,8 +1,5 @@
 run:
   deadline: 60s
-  skip-dirs:
-    - .github
-    - hack
 
 linters:
   enable:
@@ -14,6 +11,9 @@ linters:
     - gosec
 
 issues:
+  exclude-dirs:
+    - .github
+    - hack
   exclude-rules:
     - path: _test\.go
       linters:

@@ -1,16 +1,20 @@
 module github.com/artefactual-sdps/temporal-activities
 
-go 1.21.4
+go 1.22
+
+toolchain go1.22.2
 
 require (
 	github.com/artefactual-labs/bagit-gython v0.2.0
+	github.com/beevik/etree v1.4.1
 	github.com/google/safeopen v0.0.0-20240125081138-66b54d5181c6
+	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af
 	github.com/otiai10/copy v1.14.0
 	github.com/richardlehane/siegfried v1.11.1
 	github.com/tonglil/buflogr v1.1.1
-	go.artefactual.dev/tools v0.14.0
+	go.artefactual.dev/tools v0.17.0
 	go.temporal.io/sdk v1.26.1
 	gocloud.dev v0.39.0
 	gotest.tools/v3 v3.5.1
@@ -31,7 +35,6 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect

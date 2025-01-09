@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"os"
+	"path/filepath"
 
 	gobagit "github.com/nyudlts/go-bagit"
 	cp "github.com/otiai10/copy"
@@ -51,6 +53,11 @@ func New(cfg Config) *Activity {
 func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
 	logger.V(1).Info("Executing bag-create activity", "SourcePath", params.SourcePath)
+
+	// Check if directory is already a Bag
+	if _, err := os.Stat(filepath.Join(params.SourcePath, "bagit.txt")); err == nil {
+		return &Result{BagPath: params.SourcePath}, nil
+	}
 
 	dest, err := a.create(params.SourcePath, params.BagPath)
 	if err != nil {

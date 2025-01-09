@@ -48,6 +48,17 @@ func sourcePath(t *testing.T) string {
 	return td.Path()
 }
 
+func existingBagPath(t *testing.T) string {
+	t.Helper()
+
+	td := tfs.NewDir(t, "sdps_bagit_existing_bag_create_test",
+		tfs.WithFile("bagit.txt", "Fake bagit file\n"),
+		tfs.WithDir("data"),
+	)
+
+	return td.Path()
+}
+
 func TestActivity(t *testing.T) {
 	t.Parallel()
 
@@ -106,6 +117,16 @@ func TestActivity(t *testing.T) {
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test", tfs.WithMode(0o600)).Path(),
 			},
 			wantErr: "activity error (type: bag-create, scheduledEventID: 0, startedEventID: 0, identity: ): bagcreate: copy source dir to bag path: open",
+		},
+		{
+			name: "Errors if source dir is already a bag",
+			params: bagcreate.Params{
+				SourcePath: existingBagPath(t),
+			},
+			want: tfs.Expected(t,
+				tfs.WithFile("bagit.txt", "Fake bagit file\n"),
+				tfs.WithDir("data"),
+			),
 		},
 	} {
 		tt := tt

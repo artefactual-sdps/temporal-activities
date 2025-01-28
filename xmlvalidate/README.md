@@ -1,12 +1,13 @@
 # xmlvalidate
 
-Validates an XML file against an XSD schema using `xmlint`.
+Validates an XML file against an XSD schema. It also provides a validator based
+on `xmllint`.
 
 ## Requirements
 
-This activity requires the `xmllint` command be installed on the system where
-the activity worker is running. This can be installed, in Ubuntu, by entering
-the following command:
+The `XMLLintValidator` requires the `xmllint` command to be installed on the
+system where the activity worker is running. This can be installed, for example
+in Ubuntu, by entering the following command:
 
 ```bash
 apt-get install libxml2-utils
@@ -15,7 +16,8 @@ apt-get install libxml2-utils
 ## Registration
 
 The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration:
+execute the activity if that doesn't suit your needs. An example registration
+using the `xmllint` validator:
 
 ```go
 import (
@@ -28,7 +30,7 @@ import (
 tw := worker.New(...)
 
 tw.RegisterActivityWithOptions(
-    xmlvalidate.New().Execute,
+    xmlvalidate.New(xmlvalidate.NewXMLLintValidator()).Execute,
     activity.RegisterOptions{Name: xmlvalidate.Name},
 )
 ```
@@ -47,21 +49,21 @@ import (
     "github.com/artefactual-sdps/temporal-activities/xmlvalidate"
 )
 
-ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+opts := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
     ScheduleToCloseTimeout: 5 * time.Minute,
-    RetryPolicy: &temporal.RetryPolicy{MaximumAttempts: 1},
+    RetryPolicy:            &temporal.RetryPolicy{MaximumAttempts: 1},
 })
 
 var re xmlvalidate.Result
 err := workflow.ExecuteActivity(
-    ctx,
+    opts,
     xmlvalidate.Name,
     &xmlvalidate.Params{
-        XMLFilePath: "/path/to/file.xml",
-        XSDFilePath: "/path/to/file.xsd",
+        XMLPath: "/path/to/file.xml",
+        XSDPath: "/path/to/file.xsd",
     },
-).Get(ctx, &re)
+).Get(opts, &re)
 ```
 
 `err` may contain any non validation error. `re.Failures` contains the
-`xmllint` validation output as `[]bytes`.
+`xmllint` validation output as `[]string`.

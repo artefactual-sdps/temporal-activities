@@ -1,7 +1,7 @@
 # ffvalidate
 
-Identifies file formats in the given path and validates them against a
-list of allowed formats.
+Identifies file formats in the given path and validates them against a list of
+allowed formats.
 
 ## Registration
 
@@ -39,18 +39,18 @@ import (
     "github.com/artefactual-sdps/temporal-activities/ffvalidate"
 )
 
-ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+opts := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
     ScheduleToCloseTimeout: 5 * time.Minute,
-    RetryPolicy: &temporal.RetryPolicy{MaximumAttempts: 1},
+    RetryPolicy:            &temporal.RetryPolicy{MaximumAttempts: 1},
 })
 
-var result ffvalidate.Result
+var re ffvalidate.Result
 err := workflow.ExecuteActivity(
-    ctx,
+    opts,
     ffvalidate.Name,
-    &ffvalidate.Params{Path: "/path/to/files"},
-).Get(ctx, &result)
+    &ffvalidate.Params{Path: "/path/to/dir"},
+).Get(opts, &re)
 ```
 
-`err` may contain any non validation error.
-`result.Failures` contains a list of files that are not an allowed format.
+`err` may contain any non validation error. `re.Failures` contains a list of
+files that are not an allowed format.

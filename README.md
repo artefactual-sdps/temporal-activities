@@ -1,3 +1,8 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/artefactual-sdps/temporal-activities.svg)](https://pkg.go.dev/github.com/artefactual-sdps/temporal-activities)
+[![Go Report](https://goreportcard.com/badge/github.com/artefactual-sdps/temporal-activities)](https://goreportcard.com/report/github.com/artefactual-sdps/temporal-activities)
+[![Tests](https://github.com/artefactual-sdps/temporal-activities/actions/workflows/test.yml/badge.svg)](https://github.com/artefactual-sdps/temporal-activities/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/artefactual-sdps/temporal-activities)](https://app.codecov.io/gh/artefactual-sdps/temporal-activities)
+
 # Temporal Activities
 
 The `temporal-activities` repository contains several predefined Temporal

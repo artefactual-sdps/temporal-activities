@@ -7,9 +7,9 @@ in the activity options.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. See this [Go CDK guide]
-and [go.artefactual.dev/tools/bucket] for options to open a bucket. An example
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. See the [Go CDK guide] and
+[go.artefactual.dev/tools/bucket] for options to open a bucket. An example
 registration:
 
 ```go

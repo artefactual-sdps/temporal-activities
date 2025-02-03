@@ -1,7 +1,7 @@
 # bucketdownload
 
-Downloads a file/blob from a configured [gocloud.dev/blob] bucket. Allows to
-set the directory, filename and permissions for the downloaded file. It will
+Downloads a file/blob from a configured [gocloud.dev/blob] bucket. Allows
+setting the directory, filename and permissions of the downloaded file. It will
 create any missing directory if needed. If the permission parameters are not
 set, it will use `0o700` for directories and `0o600` for the file. If the
 filename is not provided, it will use the object key.
@@ -11,9 +11,9 @@ in the activity options.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. See this [Go CDK guide]
-and [go.artefactual.dev/tools/bucket] for options to open a bucket. An example
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. See the [Go CDK guide] and
+[go.artefactual.dev/tools/bucket] for options to open a bucket. An example
 registration:
 
 ```go

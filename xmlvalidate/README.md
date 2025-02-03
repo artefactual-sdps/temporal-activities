@@ -15,9 +15,9 @@ apt-get install libxml2-utils
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration
-using the `xmllint` validator:
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. An example registration using the`xmllint`
+validator:
 
 ```go
 import (

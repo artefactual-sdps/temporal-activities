@@ -2,20 +2,20 @@
 
 Uploads a local file to a configured [gocloud.dev/blob] bucket. Allows setting
 the object key with the `Key` parameter, using the filename if not set. The
-`BufferSize` parameter changes the default size in bytes of the chunks that
-will be uploaded in a single request. If 0, the driver will choose a reasonable
-default and it could be ignored by some drivers. For example, MinIO supports a
-maximum of 10,000 chuncks per upload, which may require to increase the buffer
-size to upload big files.
+`BufferSize` parameter changes the default size in bytes of the chuncks that
+will be uploaded in a single request. If `BufferSize` is 0, the driver will
+chose a reasonable default. `Buffersize` may be ignored by some drivers. For
+example, MinIO supports a maximum of 10,000 chuncks per upload, which may
+require increasing the buffer size to upload big files.
 
 This activity will heartbeat each one-third of the configured timeout, if set
 in the activity options.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. See this [Go CDK guide]
-and [go.artefactual.dev/tools/bucket] for options to open a bucket. An example
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. See the [Go CDK guide] and
+[go.artefactual.dev/tools/bucket] for options to open a bucket. An example
 registration:
 
 ```go

@@ -23,7 +23,7 @@ configuration.
 ### archiveextract
 
 Extracts the contents of an given archive to a directory. It supports the
-formats recognized by [github.com/mholt/archiver] and allows to configure the
+formats recognized by [github.com/mholt/archiver] and allows configuring the
 path and permissions of the extracted directories and files.
 
 [Read more](./archiveextract/README.md)
@@ -45,7 +45,7 @@ checksums.
 
 ### bagvalidate
 
-Checks if a given directory is a valid BagIt Bag.
+Checks if the given directory is a valid BagIt Bag.
 
 [Read more](./bagvalidate/README.md)
 
@@ -57,8 +57,8 @@ Deletes a file/blob from a configured [gocloud.dev/blob] bucket.
 
 ### bucketdownload
 
-Downloads a file/blob from a configured [gocloud.dev/blob] bucket. Allows to
-set the directory, filename and permissions for the downloaded file.
+Downloads a file/blob from a configured [gocloud.dev/blob] bucket. Allows
+setting the directory, filename and permissions of the downloaded file.
 
 [Read more](./bucketdownload/README.md)
 
@@ -71,8 +71,9 @@ the object key and the buffer size.
 
 ### ffvalidate
 
-Identifies file formats in the given path and validates them against a list of
-allowed formats.
+Identifies the file format of the files at the given path, recursively walking
+any sub-directories, and validates that the formats are in the list of allowed
+formats.
 
 [Read more](./ffvalidate/README.md)
 

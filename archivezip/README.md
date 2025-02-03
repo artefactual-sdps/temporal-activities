@@ -5,8 +5,8 @@ path, if not set then the source directory path + ".zip" will be used.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration:
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. An example registration:
 
 ```go
 import (

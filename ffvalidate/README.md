@@ -1,12 +1,13 @@
 # ffvalidate
 
-Identifies file formats in the given path and validates them against a list of
-allowed formats.
+Identifies the file format of the files at the given path, recursively walking
+any sub-directories, and validates that the formats are in the list of allowed
+formats.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration:
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. An example registration:
 
 ```go
 import (

@@ -1,6 +1,6 @@
 # bagvalidate
 
-Checks if a given directory is a valid BagIt Bag.
+Checks if the given directory is a valid BagIt Bag.
 
 ## Requirements
 
@@ -16,9 +16,9 @@ operating systems and architectures:
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration
-using the `bagit-gython` validator:
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. An example registration using the
+`bagit-gython` validator:
 
 ```go
 import (

@@ -1,18 +1,19 @@
 # archiveextract
 
 Extracts the contents of an given archive to a directory. It supports the
-formats recognized by [github.com/mholt/archiver] and allows to configure the
+formats recognized by [github.com/mholt/archiver] and allows configuring the
 path and permissions of the extracted directories and files.
 
 If the permissions configuration is not provided, it will use `0o700` for
 directories and `0o600` for files. A destination path for the extracted folder
-can be set as part of the activity parameters. If missing, the contents of the
-archive will be extracted besides it.
+can be set as part of the activity parameters. If a destination path is not
+provided the contents of the archive will be extracted to a subdirectory in the
+same directory as the original archive file.
 
 ## Registration
 
-The `Name` constant is used as example, use a different name to register and
-execute the activity if that doesn't suit your needs. An example registration:
+The `Name` constant is used as example, use any name to register and execute
+the activity that meets your needs. An example registration:
 
 ```go
 import (

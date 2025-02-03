@@ -4,6 +4,27 @@ Identifies the file format of the files at the given path, recursively walking
 any sub-directories, and validates that the formats are in the list of allowed
 formats.
 
+## Requirements
+
+This activity requires reading an allowed file formats CSV file which path is
+set on the activity configuration. This file can contain multiple columns, the
+only requirement is to include a column with the `PRONOM PUID` heading (case
+insensitive) and the allowed values. A simplified example:
+
+```csv
+Format name,PRONOM PUID
+text,x-fmt/16
+PDF/A,fmt/95
+CSV,x-fmt/18
+SIARD,fmt/161
+TIFF,fmt/353
+JPEG 2000,x-fmt/392
+WAVE,fmt/141
+FFV1,fmt/569
+MPEG-4,fmt/199
+XML/XSD,x-fmt/280
+```
+
 ## Registration
 
 The `Name` constant is used as example, use any name to register and execute

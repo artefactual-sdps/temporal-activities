@@ -101,7 +101,7 @@ fmt/95,"PDF/A "
 		{
 			name:    "Does nothing when no allowlist path configured",
 			params:  ffvalidate.Params{Path: validFormatsDir},
-			wantLog: "INFO validate-file-formats: No allowlist path configured, skipping file format validation ActivityID 0 ActivityType validate-file-formats\n",
+			wantLog: "V[1] Executing activity. ActivityID 0 ActivityType validate-file-formats\nINFO validate-file-formats: No allowlist path configured, skipping file format validation ActivityID 0 ActivityType validate-file-formats\n",
 		},
 		{
 			name:    "Errors when allowlist path doesn't exist",

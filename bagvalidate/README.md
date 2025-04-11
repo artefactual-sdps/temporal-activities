@@ -1,12 +1,13 @@
 # bagvalidate
 
-Checks if the given directory is a valid BagIt Bag.
+Checks if the given directory is a valid BagIt Bag. It includes a validator
+based on [bagit-gython] that will be used by default.
 
 ## Requirements
 
-The activity doesn't have any extra requirements. However, the [bagit-gython]
-validator used in the example below requires `glibc` and supports the following
-operating systems and architectures:
+The activity doesn't have any extra requirements. However, if the [bagit-gython]
+validator included by default is used, it requires `glibc` and supports the
+following operating systems and architectures:
 
 - darwin-amd64
 - darwin-arm64
@@ -18,7 +19,29 @@ operating systems and architectures:
 
 The `Name` constant is used as example, use any name to register and execute
 the activity that meets your needs. An example registration using the
-`bagit-gython` validator:
+`bagit-gython` validator included by default:
+
+```go
+import (
+	"go.temporal.io/sdk/activity"
+	"go.temporal.io/sdk/worker"
+
+	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
+)
+
+tw := worker.New(...)
+
+tw.RegisterActivityWithOptions(
+    bagvalidate.New(nil).Execute,
+    activity.RegisterOptions{Name: bagvalidate.Name},
+)
+```
+
+The `bagit-gython` validator doesn't work well with concurrent validations but,
+if parallelism is not a concern, it can be passed at registration time to
+prevent installing and cleanning Python on each validation. It is also possible
+to use other validators following the `BagValidator` interface. An example
+registration using a shared `bagit-gython` validator:
 
 ```go
 import (

@@ -28,7 +28,12 @@ type (
 	}
 )
 
+// New creates a new bagvalidate activity.
+// If the provided validator is nil, it defaults to using gythonValidator.
 func New(validator BagValidator) *Activity {
+	if validator == nil {
+		validator = NewGythonValidator()
+	}
 	return &Activity{validator: validator}
 }
 

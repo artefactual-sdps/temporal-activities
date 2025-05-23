@@ -89,6 +89,20 @@ func TestActivity(t *testing.T) {
 			),
 		},
 		{
+			name:   "Downloads to temp directory when DirPath is empty",
+			bucket: bucket(t, "file.txt", "content"),
+			setUp: func(t *testing.T) setup {
+				return setup{
+					params: bucketdownload.Params{Key: "file.txt"},
+					// Resulting FilePath is not predictable.
+				}
+			},
+			wantFs: fs.Expected(
+				t,
+				fs.WithFile("file.txt", "content", fs.WithMode(0o600)),
+			),
+		},
+		{
 			name:   "Downloads creating file",
 			bucket: bucket(t, "file.txt", "content"),
 			setUp: func(t *testing.T) setup {
@@ -203,7 +217,16 @@ func TestActivity(t *testing.T) {
 			assert.NilError(t, err)
 
 			var result bucketdownload.Result
-			_ = enc.Get(&result)
+			err = enc.Get(&result)
+			assert.NilError(t, err)
+
+			// Missing DirPath param, one check the created temp directory contents.
+			if setup.params.DirPath == "" {
+				dir := filepath.Dir(result.FilePath)
+				assert.Assert(t, fs.Equal(dir, tt.wantFs))
+				return
+			}
+
 			assert.DeepEqual(t, result, setup.wantRes)
 			assert.Assert(t, fs.Equal(setup.params.DirPath, tt.wantFs))
 		})

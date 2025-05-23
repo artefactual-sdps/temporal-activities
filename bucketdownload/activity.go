@@ -15,11 +15,21 @@ const Name = "bucket-download"
 
 type (
 	Params struct {
-		DirPath  string
-		DirPerm  os.FileMode
+		// Target directory, if missing it will create a new
+		// one in the default directory for temporary files.
+		DirPath string
+
+		// Target directory permissions, default: 0o700.
+		DirPerm os.FileMode
+
+		// Target filename, if missing it will use the Key value.
 		FileName string
+
+		// Target file permissions, default: 0o600.
 		FilePerm os.FileMode
-		Key      string
+
+		// Key from the object storage.
+		Key string
 	}
 	Result struct {
 		FilePath string
@@ -37,12 +47,18 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	h := temporal.StartAutoHeartbeat(ctx)
 	defer h.Stop()
 
-	dirPerm := fs.FileMode(0o700)
-	if params.DirPerm != 0 {
-		dirPerm = params.DirPerm
+	var err error
+	dirPath := params.DirPath
+	if dirPath != "" {
+		dirPerm := fs.FileMode(0o700)
+		if params.DirPerm != 0 {
+			dirPerm = params.DirPerm
+		}
+		err = os.MkdirAll(dirPath, dirPerm)
+	} else {
+		dirPath, err = os.MkdirTemp("", "bucketdownload")
 	}
-
-	if err := os.MkdirAll(params.DirPath, dirPerm); err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("bucketdownload: create directory: %w", err)
 	}
 
@@ -55,7 +71,7 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 		filePerm = params.FilePerm
 	}
 
-	filePath := filepath.Join(params.DirPath, fileName)
+	filePath := filepath.Join(dirPath, fileName)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, filePerm) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("bucketdownload: create file: %w", err)

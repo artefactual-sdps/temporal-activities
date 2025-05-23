@@ -2,9 +2,11 @@
 
 Downloads a file/blob from a configured [gocloud.dev/blob] bucket. Allows
 setting the directory, filename and permissions of the downloaded file. It will
-create any missing directory if needed. If the permission parameters are not
-set, it will use `0o700` for directories and `0o600` for the file. If the
-filename is not provided, it will use the object key.
+create any missing directory if needed when the the dir path is set, otherwise
+it will create one in the default directory for temporary files. If the
+permission parameters are not set, it will use `0o700` for directories and
+`0o600` for the file. If the filename is not provided, it will use the object
+key.
 
 This activity will heartbeat each one-third of the configured timeout, if set
 in the activity options.

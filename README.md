@@ -17,6 +17,7 @@ configuration.
 - [archivezip](#archivezip)
 - [bagcreate](#bagcreate)
 - [bagvalidate](#bagvalidate)
+- [bucketcopy](#bucketcopy)
 - [bucketdelete](#bucketdelete)
 - [bucketdownload](#bucketdownload)
 - [bucketupload](#bucketupload)
@@ -53,6 +54,11 @@ checksums.
 Checks if the given directory is a valid BagIt Bag.
 
 [Read more](./bagvalidate/README.md)
+
+### bucketcopy
+
+Copies a blob within a configured [gocloud.dev/blob] bucket. The activity
+accepts source and destination keys and performs an in-bucket copy operation.
 
 ### bucketdelete
 

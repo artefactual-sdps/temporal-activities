@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/safeopen"
-	"github.com/mholt/archiver/v4"
+	"github.com/mholt/archives"
 	"go.artefactual.dev/tools/temporal"
 )
 
@@ -97,21 +97,21 @@ func (a *Activity) extract(ctx context.Context, src, dest string) (string, error
 	}
 	defer f.Close()
 
-	format, r, err := archiver.Identify(src, f)
+	format, r, err := archives.Identify(ctx, src, f)
 	if err != nil {
-		if errors.Is(err, archiver.ErrNoMatch) {
+		if errors.Is(err, archives.NoMatch) {
 			return "", ErrInvalidArchive
 		}
 		return "", fmt.Errorf("identify archive: %v", err)
 	}
 
-	if ex, ok := format.(archiver.Extractor); ok {
+	if ex, ok := format.(archives.Extractor); ok {
 		dest, err = extractPath(src, dest)
 		if err != nil {
 			return "", fmt.Errorf("get extract path: %v", err)
 		}
 
-		if err := ex.Extract(ctx, r, nil, a.writeFileHandler(dest)); err != nil {
+		if err := ex.Extract(ctx, r, a.writeFileHandler(dest)); err != nil {
 			// Attempt to remove extract path.
 			_ = os.RemoveAll(dest)
 			return "", fmt.Errorf("extract: %v", err)
@@ -124,8 +124,8 @@ func (a *Activity) extract(ctx context.Context, src, dest string) (string, error
 }
 
 // writeFileHandler writes the extracted archive file to dest.
-func (a *Activity) writeFileHandler(dest string) archiver.FileHandler {
-	return func(ctx context.Context, f archiver.File) error {
+func (a *Activity) writeFileHandler(dest string) archives.FileHandler {
+	return func(ctx context.Context, f archives.FileInfo) error {
 		path := filepath.Join(dest, f.NameInArchive)
 
 		if f.IsDir() {

@@ -29,7 +29,7 @@ configuration.
 ### archiveextract
 
 Extracts the contents of an given archive to a directory. It supports the
-formats recognized by [github.com/mholt/archiver] and allows configuring the
+formats recognized by [github.com/mholt/archives] and allows configuring the
 path and permissions of the extracted directories and files.
 
 [Read more](./archiveextract/README.md)
@@ -110,5 +110,5 @@ on `xmllint`.
 
 [Read more](./xmlvalidate/README.md)
 
-[github.com/mholt/archiver]: https://pkg.go.dev/github.com/mholt/archiver/v4
+[github.com/mholt/archives]: https://pkg.go.dev/github.com/mholt/archives
 [gocloud.dev/blob]: https://pkg.go.dev/gocloud.dev/blob

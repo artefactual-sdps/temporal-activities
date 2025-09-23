@@ -1,7 +1,7 @@
 # archiveextract
 
 Extracts the contents of an given archive to a directory. It supports the
-formats recognized by [github.com/mholt/archiver] and allows configuring the
+formats recognized by [github.com/mholt/archives] and allows configuring the
 path and permissions of the extracted directories and files.
 
 If the permissions configuration is not provided, it will use `0o700` for
@@ -69,4 +69,4 @@ err := workflow.ExecuteActivity(
 `err` may contain any system error. `re.ExtractPath` will be the final path to
 the extracted archive contents.
 
-[github.com/mholt/archiver]: https://pkg.go.dev/github.com/mholt/archiver/v4
+[github.com/mholt/archives]: https://pkg.go.dev/github.com/mholt/archives

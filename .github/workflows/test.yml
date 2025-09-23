@@ -10,6 +10,8 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+    - name: Update package index
+      run: sudo apt-get update
     - name: Install xmllint
       run: sudo apt-get install -y libxml2-utils
     - name: Checkout code

@@ -14,7 +14,7 @@ require (
 	github.com/tonglil/buflogr v1.1.1
 	go.artefactual.dev/tools v0.14.0
 	go.temporal.io/sdk v1.33.1
-	gocloud.dev v0.43.0
+	gocloud.dev v0.45.0
 	gotest.tools/v3 v3.5.1
 )
 
@@ -36,7 +36,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
@@ -76,9 +76,9 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
-	golang.org/x/time v0.12.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/api v0.242.0 // indirect
+	google.golang.org/api v0.256.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/grpc v1.79.3 // indirect

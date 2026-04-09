@@ -139,8 +139,6 @@ func TestActivity(t *testing.T) {
 			wantErr: "activity error (type: archive-extract, scheduledEventID: 0, startedEventID: 0, identity: ): archiveextract: stat testdata/missing.zip: no such file or directory",
 		},
 	} {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

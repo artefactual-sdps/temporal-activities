@@ -16,8 +16,8 @@ import (
 const Name = "archive-extract"
 
 var (
-	ErrNotAFile       = errors.New("Not a file")
-	ErrInvalidArchive = errors.New("Invalid archive")
+	ErrNotAFile       = errors.New("not a file")
+	ErrInvalidArchive = errors.New("invalid archive")
 )
 
 type (

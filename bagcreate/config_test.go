@@ -28,7 +28,6 @@ func TestValidate(t *testing.T) {
 			wantErr: "ChecksumAlgorithm: invalid value \"foo\", must be one of (md5, sha1, sha256, sha512)",
 		},
 	} {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

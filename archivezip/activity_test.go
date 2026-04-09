@@ -54,7 +54,6 @@ func TestActivity(t *testing.T) {
 			wantErr: fmt.Sprintf("archivezip: create destination: open %s: permission denied", restrictedDir.Join(transferName+".zip")),
 		},
 	} {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 

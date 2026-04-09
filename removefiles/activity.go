@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"regexp"
 	"slices"
 
@@ -80,8 +79,15 @@ func remove(dir string, names []string, patterns []*regexp.Regexp) (int, error) 
 		return 0, fmt.Errorf("remove: path: %q: not a directory", dir)
 	}
 
-	err = filepath.WalkDir(
-		dir,
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return 0, fmt.Errorf("remove: open root: %v", err)
+	}
+	defer root.Close()
+
+	err = fs.WalkDir(
+		root.FS(),
+		".",
 		func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -100,8 +106,7 @@ func remove(dir string, names []string, patterns []*regexp.Regexp) (int, error) 
 			}
 
 			if matches {
-				err := os.RemoveAll(path)
-				if err != nil {
+				if err := root.RemoveAll(path); err != nil {
 					return fmt.Errorf("remove file: %v", err)
 				}
 				count++

@@ -15,12 +15,12 @@ import (
 // variable is used to conditionally run the test, e.g.
 // `SDPS_TEST_XMLLINT=1 go test -tags xmllint ./...`.
 func TestXMLLintValidate(t *testing.T) {
+	t.Parallel()
+
 	do := os.Getenv("SDPS_TEST_XMLLINT")
 	if do == "" {
 		t.Skip("set SDPS_TEST_XMLLINT to run this test")
 	}
-
-	t.Parallel()
 
 	type args struct {
 		xmlPath string
@@ -73,7 +73,6 @@ WXS schema ./testdata/invalid.xsd failed to compile
 			wantErr: "warning: failed to load external entity \"./testdata/not_here.xml\"\n",
 		},
 	} {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

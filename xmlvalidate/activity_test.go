@@ -114,7 +114,6 @@ WXS schema invalid.xsd failed to compile
 			wantErr:   "activity error (type: xml-validate, scheduledEventID: 0, startedEventID: 0, identity: ): stat : no such file or directory (type: PathError, retryable: true): no such file or directory (type: Errno, retryable: true)",
 		},
 	} {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

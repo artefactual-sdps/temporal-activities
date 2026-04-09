@@ -16,7 +16,6 @@ endif
 
 include hack/make/bootstrap.mk
 include hack/make/dep_golangci_lint.mk
-include hack/make/dep_golines.mk
 include hack/make/dep_gomajor.mk
 include hack/make/dep_gosec.mk
 include hack/make/dep_gotestsum.mk
@@ -25,7 +24,6 @@ include hack/make/dep_workflowcheck.mk
 
 # Lazy-evaluated list of tools.
 TOOLS = $(GOLANGCI_LINT) \
-	$(GOLINES) \
 	$(GOMAJOR) \
 	$(GOSEC) \
 	$(GOTESTSUM) \
@@ -52,17 +50,6 @@ deps: # @HELP List available module dependency updates.
 deps: $(GOMAJOR)
 	gomajor list
 
-golines: # @HELP Run the golines formatter to fix long lines.
-golines: $(GOLINES)
-	golines \
-		--chain-split-dots \
-		--ignored-dirs="$(TEST_IGNORED_PACKAGES)" \
-		--max-len=120 \
-		--reformat-tags \
-		--shorten-comments \
-		--write-output \
-		.
-
 gosec: # @HELP Run gosec security scanner.
 gosec: $(GOSEC)
 	gosec \
@@ -79,12 +66,15 @@ help:
 	        { printf "  %-30s %s\n", $$1, $$2 };  \
 	    '
 
+fmt: # @HELP Format the project Go files with golangci-lint.
+fmt: FMT_FLAGS ?=
+fmt: tool-golangci-lint
+	golangci-lint fmt $(FMT_FLAGS)
 
-lint: # @HELP Lint the project Go files with golangci-lint.
-lint: OUT_FORMAT ?= colored-line-number
-lint: LINT_FLAGS ?= --timeout=5m --fix
+lint: # @HELP Lint the project Go files with golangci-lint (linters + formatters).
+lint: LINT_FLAGS ?= --fix=1
 lint: $(GOLANGCI_LINT)
-	golangci-lint run --out-format $(OUT_FORMAT) $(LINT_FLAGS)
+	golangci-lint run $(LINT_FLAGS)
 
 list-tested-packages: # @HELP Print a list of packages being tested.
 list-tested-packages:
@@ -97,7 +87,6 @@ list-ignored-packages:
 pre-commit: # @HELP Check that code is ready to commit.
 pre-commit:
 	$(MAKE) -j lint \
-	golines \
 	gosec \
 	test-race
 

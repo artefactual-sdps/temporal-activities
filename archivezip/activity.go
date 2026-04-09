@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -57,7 +58,13 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 	z := zip.NewWriter(w)
 	defer z.Close()
 
-	err = filepath.WalkDir(params.SourceDir, func(path string, d os.DirEntry, err error) error {
+	root, err := os.OpenRoot(params.SourceDir)
+	if err != nil {
+		return &Result{}, fmt.Errorf("archivezip: open root: %v", err)
+	}
+	defer root.Close()
+
+	err = fs.WalkDir(root.FS(), ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -66,18 +73,15 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 			return nil
 		}
 
-		// Include SourceDir in the zip paths, but not its parent dirs.
-		p, err := filepath.Rel(filepath.Dir(params.SourceDir), path)
+		// Include the SourceDir name in the zip paths.
+		zipPath := filepath.Join(filepath.Base(params.SourceDir), path)
+
+		f, err := z.Create(zipPath)
 		if err != nil {
 			return err
 		}
 
-		f, err := z.Create(p)
-		if err != nil {
-			return err
-		}
-
-		r, err := os.Open(path) // #nosec G304 -- trusted path
+		r, err := root.Open(path)
 		if err != nil {
 			return err
 		}

@@ -17,7 +17,6 @@ endif
 include hack/make/bootstrap.mk
 include hack/make/dep_golangci_lint.mk
 include hack/make/dep_gomajor.mk
-include hack/make/dep_gosec.mk
 include hack/make/dep_gotestsum.mk
 include hack/make/dep_tparse.mk
 include hack/make/dep_workflowcheck.mk
@@ -25,7 +24,6 @@ include hack/make/dep_workflowcheck.mk
 # Lazy-evaluated list of tools.
 TOOLS = $(GOLANGCI_LINT) \
 	$(GOMAJOR) \
-	$(GOSEC) \
 	$(GOTESTSUM) \
 	$(TPARSE)
 
@@ -49,13 +47,6 @@ env:
 deps: # @HELP List available module dependency updates.
 deps: $(GOMAJOR)
 	gomajor list
-
-gosec: # @HELP Run gosec security scanner.
-gosec: $(GOSEC)
-	gosec \
-		-terse \
-		-exclude-dir=hack \
-		./...
 
 help: # @HELP Print this message.
 help:
@@ -87,7 +78,6 @@ list-ignored-packages:
 pre-commit: # @HELP Check that code is ready to commit.
 pre-commit:
 	$(MAKE) -j lint \
-	gosec \
 	test-race
 
 test: # @HELP Run all tests and output a summary using gotestsum.

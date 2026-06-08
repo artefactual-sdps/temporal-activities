@@ -1,15 +1,19 @@
 # ffvalidate
 
 Identifies the file format of the files at the given path, recursively walking
-any sub-directories, and validates that the formats are in the list of allowed
-formats.
+any sub-directories, and validates that the formats are in the configured list
+of allowed or disallowed formats.
 
 ## Requirements
 
-This activity requires reading an allowed file formats CSV file which path is
-set on the activity configuration. This file can contain multiple columns, the
-only requirement is to include a column with the `PRONOM PUID` heading (case
-insensitive) and the allowed values. A simplified example:
+This activity can read an allowed or disallowed file formats CSV file. Configure
+one of `AllowlistPath` or `DisallowlistPath`; configuring both is invalid.
+Call `Config.Validate()` before registering the activity if you want to fail
+fast instead of waiting for activity execution failures.
+
+The CSV file can contain multiple columns. The only requirement is to include a
+column with the `PRONOM PUID` heading (case insensitive) and the listed values.
+A simplified example:
 
 ```csv
 Format name,PRONOM PUID
@@ -40,6 +44,9 @@ import (
 
 tw := worker.New(...)
 cfg := ffvalidate.Config{AllowlistPath: "/path/to/allowed_file_formats.csv"}
+if err := cfg.Validate(); err != nil {
+    return err
+}
 
 tw.RegisterActivityWithOptions(
     ffvalidate.New(cfg).Execute,
@@ -74,5 +81,6 @@ err := workflow.ExecuteActivity(
 ).Get(opts, &re)
 ```
 
-`err` may contain any non validation error. `re.Failures` contains a list of
-files that are not an allowed format.
+`err` may contain any non validation error. When using `AllowlistPath`,
+`re.Failures` contains files that are not an allowed format. When using
+`DisallowlistPath`, `re.Failures` contains files that are a disallowed format.

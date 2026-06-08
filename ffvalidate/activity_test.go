@@ -57,6 +57,10 @@ fmt/95,"PDF/A "
 " x-fmt/111 ","text file"
 `)).Join("allowlist.csv")
 
+	disallowedFormatsList := fs.NewDir(t, "", fs.WithFile("disallowlist.csv", `Format,PRONOM PUID
+PNG,fmt/11
+`)).Join("disallowlist.csv")
+
 	tests := []struct {
 		name    string
 		cfg     ffvalidate.Config
@@ -68,6 +72,11 @@ fmt/95,"PDF/A "
 		{
 			name:   "Succeeds with valid formats",
 			cfg:    ffvalidate.Config{AllowlistPath: "./testdata/allowed_file_formats.csv"},
+			params: ffvalidate.Params{Path: validFormatsDir},
+		},
+		{
+			name:   "Succeeds with valid formats not in disallowlist",
+			cfg:    ffvalidate.Config{DisallowlistPath: disallowedFormatsList},
 			params: ffvalidate.Params{Path: validFormatsDir},
 		},
 		{
@@ -93,6 +102,23 @@ fmt/95,"PDF/A "
 			},
 		},
 		{
+			name:   "Fails with disallowed formats",
+			cfg:    ffvalidate.Config{DisallowlistPath: disallowedFormatsList},
+			params: ffvalidate.Params{Path: invalidFormatsDir},
+			want: ffvalidate.Result{
+				Failures: []string{
+					fmt.Sprintf(
+						`file format %q disallowed: "invalid_sip/dir/file1.png"`,
+						"fmt/11",
+					),
+					fmt.Sprintf(
+						`file format %q disallowed: "invalid_sip/file2.png"`,
+						"fmt/11",
+					),
+				},
+			},
+		},
+		{
 			name:    "Fails with empty source",
 			cfg:     ffvalidate.Config{AllowlistPath: "./testdata/allowed_file_formats.csv"},
 			params:  ffvalidate.Params{Path: fs.NewDir(t, "", fs.WithFile("file.txt", "")).Path()},
@@ -101,7 +127,16 @@ fmt/95,"PDF/A "
 		{
 			name:    "Does nothing when no allowlist path configured",
 			params:  ffvalidate.Params{Path: validFormatsDir},
-			wantLog: "INFO validate-file-formats: No allowlist path configured, skipping file format validation ActivityID 0 ActivityType validate-file-formats\n",
+			wantLog: "INFO validate-file-formats: No allowlist or disallowlist path configured, skipping file format validation ActivityID 0 ActivityType validate-file-formats\n",
+		},
+		{
+			name: "Errors when allowlist and disallowlist are both configured",
+			cfg: ffvalidate.Config{
+				AllowlistPath:    "./testdata/allowed_file_formats.csv",
+				DisallowlistPath: disallowedFormatsList,
+			},
+			params:  ffvalidate.Params{Path: validFormatsDir},
+			wantErr: "validate-file-formats: invalid config: AllowlistPath and DisallowlistPath cannot both be set",
 		},
 		{
 			name:    "Errors when allowlist path doesn't exist",
@@ -113,7 +148,7 @@ fmt/95,"PDF/A "
 			name:    "Errors when allowlist is empty",
 			cfg:     ffvalidate.Config{AllowlistPath: emptyList},
 			params:  ffvalidate.Params{Path: validFormatsDir},
-			wantErr: "validate-file-formats: load allowed formats: no allowed file formats",
+			wantErr: "validate-file-formats: load allowed formats: no file formats found",
 		},
 		{
 			name:    "Errors when no PRONOM PUID column exists",

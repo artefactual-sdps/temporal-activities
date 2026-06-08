@@ -55,26 +55,37 @@ type formatList map[string]struct{}
 func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error) {
 	logger := temporal.GetLogger(ctx)
 
-	if a.cfg.AllowlistPath == "" {
-		logger.Info(Name + ": No allowlist path configured, skipping file format validation")
+	if err := a.cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("%s: invalid config: %v", Name, err)
+	}
+
+	listPath := a.cfg.AllowlistPath
+	mode := "allowed"
+	if listPath == "" {
+		listPath = a.cfg.DisallowlistPath
+		mode = "disallowed"
+	}
+
+	if listPath == "" {
+		logger.Info(Name + ": No allowlist or disallowlist path configured, skipping file format validation")
 
 		return nil, nil
 	}
 
-	f, err := os.Open(a.cfg.AllowlistPath)
+	f, err := os.Open(listPath)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %v", Name, err)
 	}
 	defer f.Close()
 
-	allowed, err := parseFormatList(f)
+	formats, err := parseFormatList(f)
 	if err != nil {
-		return nil, fmt.Errorf("%s: load allowed formats: %v", Name, err)
+		return nil, fmt.Errorf("%s: load %s formats: %v", Name, mode, err)
 	}
 
-	failures, err := checkAllowed(allowed, params.Path)
+	failures, err := checkFormats(formats, params.Path, mode)
 	if err != nil {
-		return nil, fmt.Errorf("%s: check allowed formats: %v", Name, err)
+		return nil, fmt.Errorf("%s: check %s formats: %v", Name, mode, err)
 	}
 
 	return &Result{Failures: failures}, nil
@@ -114,13 +125,13 @@ func parseFormatList(r io.Reader) (formatList, error) {
 	}
 
 	if len(formats) == 0 {
-		return nil, fmt.Errorf("no allowed file formats")
+		return nil, errors.New("no file formats found")
 	}
 
 	return formats, nil
 }
 
-func checkAllowed(allowed formatList, base string) ([]string, error) {
+func checkFormats(formats formatList, base, mode string) ([]string, error) {
 	var failures []string
 
 	sf := NewSiegfriedEmbed()
@@ -143,8 +154,15 @@ func checkAllowed(allowed formatList, base string) ([]string, error) {
 			return fmt.Errorf("get relative path: %v", err)
 		}
 
-		if _, ok := allowed[ff.ID]; !ok {
-			failures = append(failures, fmt.Sprintf("file format %q not allowed: %q", ff.ID, rel))
+		switch mode {
+		case "allowed":
+			if _, ok := formats[ff.ID]; !ok {
+				failures = append(failures, fmt.Sprintf("file format %q not allowed: %q", ff.ID, rel))
+			}
+		case "disallowed":
+			if _, ok := formats[ff.ID]; ok {
+				failures = append(failures, fmt.Sprintf("file format %q disallowed: %q", ff.ID, rel))
+			}
 		}
 
 		return nil

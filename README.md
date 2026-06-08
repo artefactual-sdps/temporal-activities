@@ -83,8 +83,8 @@ the object key and the buffer size.
 ### ffvalidate
 
 Identifies the file format of the files at the given path, recursively walking
-any sub-directories, and validates that the formats are in the list of allowed
-formats.
+any sub-directories, and validates that the formats are in the configured list
+of allowed or disallowed formats.
 
 [Read more](./ffvalidate/README.md)
 

@@ -68,7 +68,7 @@ help:
 
 fmt: # @HELP Format the project Go files with golangci-lint.
 fmt: FMT_FLAGS ?=
-fmt: tool-golangci-lint
+fmt: $(GOLANGCI_LINT)
 	golangci-lint fmt $(FMT_FLAGS)
 
 lint: # @HELP Lint the project Go files with golangci-lint (linters + formatters).

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	bagit_gython "github.com/artefactual-labs/bagit-gython"
 	"go.artefactual.dev/tools/temporal"
 )
 
@@ -19,8 +20,8 @@ type (
 		// Valid is true if the Bag is valid.
 		Valid bool
 
-		// Error is a message indicating why validation failed, and will always be
-		// empty when Valid is true.
+		// Error is a message indicating why validation failed, and will always
+		// be empty when Valid is true.
 		Error string
 	}
 	Activity struct {
@@ -28,13 +29,37 @@ type (
 	}
 )
 
-// New creates a new bagvalidate activity.
-// If the provided validator is nil, it defaults to using gythonValidator.
+// New creates a new bagvalidate Activity.
+//
+// If the provided validator is nil, New defaults to using a gythonValidator.
+// gythonValidator bootstraps a new Python runtime environment and runner each
+// time Execute is called and deletes it after validation is complete.
+// Recreating the runtime on each execution is much slower than using the pooled
+// validator if Execute will be called multiple times, so NewPooled should be
+// preferred in most cases.
 func New(validator BagValidator) *Activity {
 	if validator == nil {
 		validator = NewGythonValidator()
 	}
 	return &Activity{validator: validator}
+}
+
+// NewPooled creates a bagvalidate Activity using a concurrency safe
+// bagit_gython validator pool with the given configuration.
+func NewPooled(cfg Config) (*Activity, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("bagvalidate: invalid config: %v", err)
+	}
+
+	v, err := bagit_gython.NewValidator(
+		bagit_gython.WithCacheDir(cfg.CacheDir),
+		bagit_gython.WithPoolSize(cfg.PoolSize),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("bagvalidate: failed to create validator: %v", err)
+	}
+
+	return &Activity{validator: v}, nil
 }
 
 // Execute validates the BagIt Bag located at Path.

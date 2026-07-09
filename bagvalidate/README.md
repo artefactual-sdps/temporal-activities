@@ -19,37 +19,38 @@ following operating systems and architectures:
 
 The `Name` constant is used as example, use any name to register and execute
 the activity that meets your needs. An example registration using the
-`bagit-gython` validator included by default:
+`bagit-gython` pooled validator:
 
 ```go
 import (
-	"go.temporal.io/sdk/activity"
-	"go.temporal.io/sdk/worker"
+    "go.temporal.io/sdk/activity"
+    "go.temporal.io/sdk/worker"
 
-	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
+    "github.com/artefactual-sdps/temporal-activities/bagvalidate"
 )
 
 tw := worker.New(...)
 
 tw.RegisterActivityWithOptions(
-    bagvalidate.New(nil).Execute,
+    bagvalidate.NewPooled(
+        bagvalidate.Config{
+            CacheDir: "/home/enduro/.cache/bagit-gython",
+            PoolSize: 1,
+        }
+    ).Execute,
     activity.RegisterOptions{Name: bagvalidate.Name},
 )
 ```
 
-The `bagit-gython` validator doesn't work well with concurrent validations but,
-if parallelism is not a concern, it can be passed at registration time to
-prevent installing and cleanning Python on each validation. It is also possible
-to use other validators following the `BagValidator` interface. An example
-registration using a shared `bagit-gython` validator:
+A custom BagIt validator can be specified using the `New()` constructor:
 
 ```go
 import (
-	bagit_gython "github.com/artefactual-labs/bagit-gython"
-	"go.temporal.io/sdk/activity"
-	"go.temporal.io/sdk/worker"
+    bagit_gython "github.com/artefactual-labs/bagit-gython"
+    "go.temporal.io/sdk/activity"
+    "go.temporal.io/sdk/worker"
 
-	"github.com/artefactual-sdps/temporal-activities/bagvalidate"
+    "github.com/artefactual-sdps/temporal-activities/bagvalidate"
 )
 
 tw := worker.New(...)

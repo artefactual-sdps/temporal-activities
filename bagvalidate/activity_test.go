@@ -135,6 +135,45 @@ func TestActivity(t *testing.T) {
 	}
 }
 
+func TestNewPooled(t *testing.T) {
+	t.Parallel()
+
+	type test struct {
+		name    string
+		config  bagvalidate.Config
+		wantErr string
+	}
+	for _, tt := range []test{
+		{
+			name: "Creates a pooled validator",
+			config: bagvalidate.Config{
+				PoolSize: 2,
+			},
+		},
+		{
+			name: "Returns an error for invalid config",
+			config: bagvalidate.Config{
+				PoolSize: -1,
+			},
+			wantErr: "bagvalidate: invalid config: PoolSize: -1 is less than the minimum value (1)",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a, err := bagvalidate.NewPooled(tt.config)
+			if tt.wantErr != "" {
+				assert.Error(t, err, tt.wantErr)
+				return
+			}
+			assert.NilError(t, err)
+			assert.Assert(t, a != nil)
+
+			assert.NilError(t, a.Close())
+		})
+	}
+}
+
 func TestActivitySystemError(t *testing.T) {
 	t.Parallel()
 

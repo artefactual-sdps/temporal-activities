@@ -3,6 +3,9 @@
 Creates a Zip archive from a given directory. Allows setting the destination
 path, if not set then the source directory path + ".zip" will be used.
 
+Each file and directory entry in the Zip archive records the modification time
+of its source.
+
 ## Registration
 
 The `Name` constant is used as example, use any name to register and execute

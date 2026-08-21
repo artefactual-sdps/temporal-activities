@@ -10,6 +10,9 @@ can be set as part of the activity parameters. If a destination path is not
 provided the contents of the archive will be extracted to a subdirectory in the
 same directory as the original archive file.
 
+Modification times stored in the archive are applied to extracted files and
+directories.
+
 ## Registration
 
 The `Name` constant is used as example, use any name to register and execute

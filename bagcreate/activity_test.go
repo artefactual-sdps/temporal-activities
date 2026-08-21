@@ -2,7 +2,10 @@ package bagcreate_test
 
 import (
 	"io/fs"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	temporalsdk_activity "go.temporal.io/sdk/activity"
 	temporalsdk_testsuite "go.temporal.io/sdk/testsuite"
@@ -62,12 +65,17 @@ func existingBagPath(t *testing.T) string {
 func TestActivity(t *testing.T) {
 	t.Parallel()
 
+	wantModTime := time.Date(2001, time.February, 3, 4, 5, 6, 0, time.UTC)
+	sourceWithModTime := sourcePath(t)
+	assert.NilError(t, os.Chtimes(filepath.Join(sourceWithModTime, "small.txt"), wantModTime, wantModTime))
+
 	type test struct {
-		name    string
-		cfg     bagcreate.Config
-		params  bagcreate.Params
-		want    tfs.Manifest
-		wantErr string
+		name        string
+		cfg         bagcreate.Config
+		params      bagcreate.Params
+		want        tfs.Manifest
+		wantModTime time.Time
+		wantErr     string
 	}
 	for _, tt := range []test{
 		{
@@ -84,6 +92,15 @@ func TestActivity(t *testing.T) {
 				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test").Path(),
 			},
 			want: testBagManifest(t),
+		},
+		{
+			name: "Preserves file modification time when creating a bag in a new dir",
+			params: bagcreate.Params{
+				SourcePath: sourceWithModTime,
+				BagPath:    tfs.NewDir(t, "sdps_bagit_create_test").Path(),
+			},
+			want:        testBagManifest(t),
+			wantModTime: wantModTime,
 		},
 		{
 			name: "Creates a bag with SHA-256 checksums",
@@ -153,6 +170,12 @@ func TestActivity(t *testing.T) {
 			// so just assert that the expected metadata files are present, the
 			// manifest is correct, and data directory contains the right files.
 			assert.Assert(t, tfs.Equal(result.BagPath, tt.want))
+
+			if !tt.wantModTime.IsZero() {
+				info, err := os.Stat(filepath.Join(result.BagPath, "data", "small.txt"))
+				assert.NilError(t, err)
+				assert.Equal(t, info.ModTime().UTC(), tt.wantModTime)
+			}
 		})
 	}
 }

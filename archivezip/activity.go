@@ -69,16 +69,30 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 			return err
 		}
 
-		if d.IsDir() {
-			return nil
-		}
-
 		// Include the SourceDir name in the zip paths.
-		zipPath := filepath.Join(filepath.Base(params.SourceDir), path)
+		zipPath := filepath.ToSlash(filepath.Join(filepath.Base(params.SourceDir), path))
 
-		f, err := z.Create(zipPath)
+		info, err := root.Stat(path)
 		if err != nil {
 			return err
+		}
+
+		method := uint16(zip.Deflate)
+		if d.IsDir() {
+			zipPath += "/"
+			method = zip.Store
+		}
+
+		f, err := z.CreateHeader(&zip.FileHeader{
+			Name:     zipPath,
+			Method:   method,
+			Modified: info.ModTime(),
+		})
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
 		}
 
 		r, err := root.Open(path)

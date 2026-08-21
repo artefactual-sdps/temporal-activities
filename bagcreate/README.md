@@ -6,6 +6,8 @@ path, replacing the original directory contents. The checksum algorithm used to
 generate file checksums can be configured, valid values are "md5", "sha1",
 "sha256" and "sha512" (default).
 
+Source file modification times are preserved in the resulting Bag.
+
 ## Registration
 
 The `Name` constant is used as example, use any name to register and execute

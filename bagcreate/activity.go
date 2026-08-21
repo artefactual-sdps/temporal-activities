@@ -73,7 +73,7 @@ func (a *Activity) create(src, dest string) (string, error) {
 	if dest == "" {
 		dest = src
 	} else {
-		if err := cp.Copy(src, dest); err != nil {
+		if err := cp.Copy(src, dest, cp.Options{PreserveTimes: true}); err != nil {
 			return "", fmt.Errorf("copy source dir to bag path: %v", err)
 		}
 	}

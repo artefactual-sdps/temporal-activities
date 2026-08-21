@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/google/safeopen"
 	"github.com/mholt/archives"
@@ -36,6 +37,10 @@ type (
 	}
 	Activity struct {
 		cfg Config
+	}
+	dirModTime struct {
+		path    string
+		modTime time.Time
 	}
 )
 
@@ -111,11 +116,32 @@ func (a *Activity) extract(ctx context.Context, src, dest string) (string, error
 			return "", fmt.Errorf("get extract path: %v", err)
 		}
 
-		if err := ex.Extract(ctx, r, a.writeFileHandler(dest)); err != nil {
-			// Attempt to remove extract path.
-			_ = os.RemoveAll(dest)
+		extracted := false
+		defer func() {
+			if !extracted {
+				_ = os.RemoveAll(dest)
+			}
+		}()
+
+		root, err := os.OpenRoot(dest)
+		if err != nil {
+			return "", fmt.Errorf("open extract root: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		// Restore directory mtimes after extraction because creating child
+		// entries changes the parent directory's mtime.
+		var dirModTimes []dirModTime
+		if err := ex.Extract(ctx, r, a.writeFileHandler(dest, root, &dirModTimes)); err != nil {
 			return "", fmt.Errorf("extract: %v", err)
 		}
+
+		for _, dirModTime := range dirModTimes {
+			if err := root.Chtimes(dirModTime.path, dirModTime.modTime, dirModTime.modTime); err != nil {
+				return "", fmt.Errorf("restore directory modification time: %v", err)
+			}
+		}
+		extracted = true
 	} else {
 		return "", fmt.Errorf("no extractor found: %q", src)
 	}
@@ -124,24 +150,27 @@ func (a *Activity) extract(ctx context.Context, src, dest string) (string, error
 }
 
 // writeFileHandler writes the extracted archive file to dest.
-func (a *Activity) writeFileHandler(dest string) archives.FileHandler {
+func (a *Activity) writeFileHandler(dest string, root *os.Root, dirModTimes *[]dirModTime) archives.FileHandler {
 	return func(ctx context.Context, f archives.FileInfo) error {
-		path := filepath.Join(dest, f.NameInArchive)
+		path := filepath.Clean(filepath.FromSlash(f.NameInArchive))
 
 		if f.IsDir() {
 			// Make any missing dirs in path, then return.
-			if err := os.MkdirAll(path, a.cfg.DirMode); err != nil {
+			if err := root.MkdirAll(path, a.cfg.DirMode); err != nil {
 				return fmt.Errorf("make directories: %v", err)
+			}
+			if modTime := f.ModTime(); !modTime.IsZero() {
+				*dirModTimes = append(*dirModTimes, dirModTime{path: path, modTime: modTime})
 			}
 			return nil
 		} else {
 			// Make any missing parent dirs before creating a file.
-			if err := os.MkdirAll(filepath.Dir(path), a.cfg.DirMode); err != nil {
+			if err := root.MkdirAll(filepath.Dir(path), a.cfg.DirMode); err != nil {
 				return fmt.Errorf("make parent directories: %v", err)
 			}
 		}
 
-		df, err := safeopen.CreateBeneath(dest, f.NameInArchive)
+		df, err := safeopen.CreateBeneath(dest, path)
 		if err != nil {
 			return fmt.Errorf("create file: %v", err)
 		}
@@ -157,9 +186,14 @@ func (a *Activity) writeFileHandler(dest string) archives.FileHandler {
 		}
 		defer r.Close()
 
-		_, err = io.Copy(df, r)
-		if err != nil {
+		if _, err := io.Copy(df, r); err != nil {
 			return fmt.Errorf("copy: %v", err)
+		}
+
+		if modTime := f.ModTime(); !modTime.IsZero() {
+			if err := root.Chtimes(path, modTime, modTime); err != nil {
+				return fmt.Errorf("set modification time: %v", err)
+			}
 		}
 
 		return nil

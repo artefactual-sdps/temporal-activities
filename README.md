@@ -16,6 +16,7 @@ configuration.
 - [archiveextract](#archiveextract)
 - [archivezip](#archivezip)
 - [bagcreate](#bagcreate)
+- [bagextract](#bagextract)
 - [bagvalidate](#bagvalidate)
 - [bucketcopy](#bucketcopy)
 - [bucketdelete](#bucketdelete)
@@ -48,6 +49,14 @@ the Bag should be created and the checksum algorithm used to generate file
 checksums.
 
 [Read more](./bagcreate/README.md)
+
+### bagextract
+
+Removes BagIt bag structure from a given directory by moving the contents of
+the `data` directory to the bag root. If the path is not a bag, the activity
+does nothing.
+
+[Read more](./bagextract/README.md)
 
 ### bagvalidate
 

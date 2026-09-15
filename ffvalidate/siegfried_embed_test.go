@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
+	"gotest.tools/v3/fs"
 
 	"github.com/artefactual-sdps/temporal-activities/ffvalidate"
 )
@@ -34,6 +35,17 @@ func TestSiegfriedEmbed(t *testing.T) {
 		sf := ffvalidate.NewSiegfriedEmbed()
 		_, err := sf.Identify("foobar.txt")
 		assert.Error(t, err, "open foobar.txt: no such file or directory")
+	})
+
+	t.Run("Errors when file is empty", func(t *testing.T) {
+		t.Parallel()
+
+		td := fs.NewDir(t, "", fs.WithFile("empty.png", ""))
+
+		sf := ffvalidate.NewSiegfriedEmbed()
+		got, err := sf.Identify(td.Join("empty.png"))
+		assert.Error(t, err, "empty source")
+		assert.Equal(t, got, (*ffvalidate.FileFormat)(nil))
 	})
 }
 

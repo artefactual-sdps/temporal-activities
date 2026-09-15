@@ -10,6 +10,8 @@ import (
 	"github.com/richardlehane/siegfried/pkg/static"
 )
 
+var ErrEmptySource = fmt.Errorf("empty source")
+
 // SiegfriedEmbed is an implementation of Siegfried based on the library dist.
 // It should be the fastest implementation because it loads just once.
 type siegfriedEmbed struct {
@@ -40,6 +42,11 @@ func (sf *siegfriedEmbed) Identify(path string) (*FileFormat, error) {
 
 	ids, err := sf.embed.Identify(f, f.Name(), "")
 	if err != nil {
+		// Siegfried doesn't expose the error type for empty files, so we have
+		// to check the error message.
+		if err.Error() == ErrEmptySource.Error() {
+			return nil, ErrEmptySource
+		}
 		return nil, err
 	}
 	if len(ids) > 1 {

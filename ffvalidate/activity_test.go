@@ -119,10 +119,22 @@ PNG,fmt/11
 			},
 		},
 		{
-			name:    "Fails with empty source",
-			cfg:     ffvalidate.Config{AllowlistPath: "./testdata/allowed_file_formats.csv"},
-			params:  ffvalidate.Params{Path: fs.NewDir(t, "", fs.WithFile("file.txt", "")).Path()},
-			wantErr: "validate-file-formats: check allowed formats: identify format: empty source",
+			name: "Reports empty files",
+			cfg:  ffvalidate.Config{AllowlistPath: "./testdata/allowed_file_formats.csv"},
+			params: ffvalidate.Params{
+				Path: fs.NewDir(t, "",
+					fs.WithDir("empty_files",
+						fs.WithFile("file.txt", ""),
+						fs.WithFile("image.png", ""),
+					),
+				).Path(),
+			},
+			want: ffvalidate.Result{
+				Failures: []string{
+					`empty (0 byte) file: "empty_files/file.txt"`,
+					`empty (0 byte) file: "empty_files/image.png"`,
+				},
+			},
 		},
 		{
 			name:    "Does nothing when no allowlist path configured",

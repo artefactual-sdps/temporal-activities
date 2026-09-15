@@ -144,14 +144,19 @@ func checkFormats(formats formatList, base, mode string) ([]string, error) {
 			return nil
 		}
 
-		ff, err := sf.Identify(p)
-		if err != nil {
-			return fmt.Errorf("identify format: %v", err)
-		}
-
 		rel, err := filepath.Rel(base, p)
 		if err != nil {
 			return fmt.Errorf("get relative path: %v", err)
+		}
+
+		ff, err := sf.Identify(p)
+		if err != nil {
+			if errors.Is(err, ErrEmptySource) {
+				failures = append(failures, fmt.Sprintf("empty (0 byte) file: %q", rel))
+				return nil
+			}
+
+			return fmt.Errorf("identify format: %v", err)
 		}
 
 		switch mode {

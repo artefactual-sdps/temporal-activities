@@ -23,6 +23,7 @@ configuration.
 - [bucketdownload](#bucketdownload)
 - [bucketupload](#bucketupload)
 - [ffvalidate](#ffvalidate)
+- [jsonvalidate](#jsonvalidate)
 - [removefiles](#removefiles)
 - [removepaths](#removepaths)
 - [xmlvalidate](#xmlvalidate)
@@ -96,6 +97,13 @@ any sub-directories, and validates that the formats are in the configured list
 of allowed or disallowed formats.
 
 [Read more](./ffvalidate/README.md)
+
+### jsonvalidate
+
+Validates a JSON document against a JSON Schema. A `JSONValidator`
+implementation must be supplied when the activity is constructed.
+
+[Read more](./jsonvalidate/README.md)
 
 ### removefiles
 

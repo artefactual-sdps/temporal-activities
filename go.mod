@@ -9,6 +9,7 @@ require (
 	github.com/nyudlts/go-bagit v0.3.0-alpha.0.20240515212815-8dab411c23af
 	github.com/otiai10/copy v1.14.0
 	github.com/richardlehane/siegfried v1.11.4
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/tonglil/buflogr v1.1.1
 	go.artefactual.dev/tools v0.14.0
 	go.temporal.io/sdk v1.33.1

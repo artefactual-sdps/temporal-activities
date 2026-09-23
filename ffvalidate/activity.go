@@ -72,7 +72,7 @@ func (a *Activity) Execute(ctx context.Context, params *Params) (*Result, error)
 		return nil, nil
 	}
 
-	f, err := os.Open(listPath)
+	f, err := os.Open(listPath) // #nosec G304 -- trusted path.
 	if err != nil {
 		return nil, fmt.Errorf("%s: %v", Name, err)
 	}

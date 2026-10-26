@@ -1,6 +1,8 @@
 module github.com/artefactual-sdps/temporal-activities
 
-go 1.26.6
+go 1.26.0
+
+toolchain go1.26.10
 
 require (
 	github.com/artefactual-labs/bagit-gython v0.2.0

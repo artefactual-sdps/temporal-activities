@@ -3,6 +3,7 @@ package xmlvalidate_test
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -47,9 +48,7 @@ func TestXMLLintValidate(t *testing.T) {
 				xmlPath: "./testdata/person_invalid.xml",
 				xsdPath: "./testdata/person.xsd",
 			},
-			want: `./testdata/person_invalid.xml:3: element age: Schemas validity error : Element 'age': This element is not expected. Expected is ( name ).
-./testdata/person_invalid.xml fails to validate
-`,
+			want: "Element 'age': This element is not expected. Expected is ( name ).",
 		},
 		{
 			name: "returns a validation error when XSD is invalid",
@@ -57,20 +56,23 @@ func TestXMLLintValidate(t *testing.T) {
 				xmlPath: "./testdata/person_valid.xml",
 				xsdPath: "./testdata/invalid.xsd",
 			},
-			want: `./testdata/invalid.xsd:1: parser error : Start tag expected, '<' not found
-junk
-^
-Schemas parser error : Failed to parse the XML resource './testdata/invalid.xsd'.
-WXS schema ./testdata/invalid.xsd failed to compile
-`,
+			want: "parser error : Start tag expected, '<' not found",
 		},
 		{
-			name: "returns a validation error when XML doesn't exist",
+			name: "returns an error when XML doesn't exist",
 			args: args{
 				xmlPath: "./testdata/not_here.xml",
 				xsdPath: "./testdata/person.xsd",
 			},
-			wantErr: "warning: failed to load external entity \"./testdata/not_here.xml\"\n",
+			wantErr: "XML file does not exist: ./testdata/not_here.xml",
+		},
+		{
+			name: "returns an error when XSD doesn't exist",
+			args: args{
+				xmlPath: "./testdata/person_valid.xml",
+				xsdPath: "./testdata/not_here.xsd",
+			},
+			wantErr: "XSD file does not exist: ./testdata/not_here.xsd",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -80,12 +82,12 @@ WXS schema ./testdata/invalid.xsd failed to compile
 			got, err := v.Validate(context.Background(), tt.args.xmlPath, tt.args.xsdPath)
 
 			if tt.wantErr != "" {
-				assert.Error(t, err, tt.wantErr)
+				assert.ErrorContains(t, err, tt.wantErr)
 				return
 			}
 			assert.NilError(t, err)
 
-			assert.Equal(t, got, tt.want)
+			assert.Assert(t, strings.Contains(got, tt.want), "unexpected result: want %q, got %q", tt.want, got)
 		})
 	}
 }

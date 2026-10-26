@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"os"
 	"os/exec"
 )
 
@@ -24,6 +25,20 @@ func NewXMLLintValidator() *XMLLintValidator {
 func (v *XMLLintValidator) Validate(ctx context.Context, xmlPath, xsdPath string) (string, error) {
 	toolPath, err := exec.LookPath("xmllint")
 	if err != nil {
+		return "", err
+	}
+
+	if _, err := os.Stat(xmlPath); err != nil {
+		if os.IsNotExist(err) {
+			return "", errors.New("XML file does not exist: " + xmlPath)
+		}
+		return "", err
+	}
+
+	if _, err := os.Stat(xsdPath); err != nil {
+		if os.IsNotExist(err) {
+			return "", errors.New("XSD file does not exist: " + xsdPath)
+		}
 		return "", err
 	}
 
